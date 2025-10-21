@@ -404,15 +404,40 @@ class WFHAttendanceApp:
             messagebox.showerror("Error", "Please enter both User ID and User Name")
             return
         
-        # Check for duplicates
-        is_duplicate, error_message = self.check_duplicate_user(user_id, user_name)
+        # Check if this is a new registration or existing user login
+        is_existing_user = False
+        existing_user_name = ""
         
-        if is_duplicate:
-            messagebox.showerror("Duplicate User", error_message)
-            return
+        for user in self.registered_users:
+            if user['user_id'].lower() == user_id.lower():
+                if user['user_name'].lower() == user_name.lower():
+                    # Existing user logging in with correct credentials
+                    is_existing_user = True
+                    existing_user_name = user['user_name']
+                    break
+                else:
+                    # User ID exists but name doesn't match
+                    messagebox.showerror(
+                        "Login Error", 
+                        f"User ID '{user_id}' is registered to '{user['user_name']}'. "
+                        f"Please use the correct User Name."
+                    )
+                    return
         
-        # Register new user
-        self.register_new_user(user_id, user_name)
+        if not is_existing_user:
+            # New user registration - check for duplicates
+            is_duplicate, error_message = self.check_duplicate_user(user_id, user_name)
+            
+            if is_duplicate:
+                messagebox.showerror("Duplicate User", error_message)
+                return
+            
+            # Register new user
+            self.register_new_user(user_id, user_name)
+            messagebox.showinfo("Registration Successful", f"User '{user_name}' ({user_id}) registered successfully!")
+        else:
+            # Existing user login
+            messagebox.showinfo("Login Successful", f"Welcome back {existing_user_name}!")
         
         self.current_user_id = user_id
         
@@ -420,7 +445,7 @@ class WFHAttendanceApp:
         self.login_status_var.set(f"Logged in as: {user_name} ({user_id})")
         self.login_status_label.configure(foreground='#27ae60')
         
-        # Enable/disable buttons
+        # Enable/disable buttons - ALWAYS enable login/logout regardless of session
         self.login_btn.config(state=tk.DISABLED)
         self.logout_btn.config(state=tk.NORMAL)
         self.time_in_btn.config(state=tk.NORMAL)
@@ -428,10 +453,8 @@ class WFHAttendanceApp:
         self.user_id_entry.config(state=tk.DISABLED)
         self.user_name_entry.config(state=tk.DISABLED)
         
-        # Check for active session
+        # Check for active session (this only affects Time In/Time Out buttons)
         self.check_active_session()
-        
-        messagebox.showinfo("Registration Successful", f"User '{user_name}' ({user_id}) registered successfully!")
     
     def view_registered_users(self):
         """Show all registered users in a new window"""
@@ -509,7 +532,17 @@ class WFHAttendanceApp:
         close_btn.pack(pady=10)
     
     def handle_logout(self):
-        """Handle user logout"""
+        """Handle user logout - ALWAYS allowed regardless of session status"""
+        # Confirm logout if user has active session
+        if self.current_session_id:
+            confirm = messagebox.askyesno(
+                "Logout with Active Session",
+                "You have an active Time In session. Are you sure you want to logout?\n\n"
+                "You can login again later to complete your Time Out."
+            )
+            if not confirm:
+                return
+        
         self.current_user_id = None
         self.current_session_id = None
         
@@ -518,7 +551,7 @@ class WFHAttendanceApp:
         self.login_status_label.configure(foreground='#e74c3c')
         self.attendance_status_var.set("No active session")
         
-        # Enable/disable buttons
+        # Enable/disable buttons - ALWAYS allow login/logout
         self.login_btn.config(state=tk.NORMAL)
         self.logout_btn.config(state=tk.DISABLED)
         self.time_in_btn.config(state=tk.DISABLED)
@@ -526,9 +559,15 @@ class WFHAttendanceApp:
         self.auto_time_in_btn.config(state=tk.DISABLED)
         self.user_id_entry.config(state=tk.NORMAL)
         self.user_name_entry.config(state=tk.NORMAL)
+        
+        # Clear input fields
+        self.user_id_var.set("")
+        self.user_name_var.set("")
+        
+        messagebox.showinfo("Logout Successful", "You have been logged out successfully!")
     
     def check_active_session(self):
-        """Check if user has an active time-in session"""
+        """Check if user has an active time-in session (only affects Time In/Time Out buttons)"""
         user_sessions = [s for s in self.active_sessions if s['user_id'] == self.current_user_id]
         
         if user_sessions:
@@ -537,12 +576,14 @@ class WFHAttendanceApp:
             self.attendance_status_var.set(
                 f"Active session: Time In at {session['time_in']}"
             )
+            # Only disable Time In button when session is active
             self.time_in_btn.config(state=tk.DISABLED)
             self.time_out_btn.config(state=tk.NORMAL)
             self.auto_time_in_btn.config(state=tk.DISABLED)
         else:
             self.current_session_id = None
             self.attendance_status_var.set("Ready for Time In")
+            # Enable Time In button when no session
             self.time_in_btn.config(state=tk.NORMAL)
             self.time_out_btn.config(state=tk.DISABLED)
             self.auto_time_in_btn.config(state=tk.NORMAL)
@@ -586,6 +627,7 @@ class WFHAttendanceApp:
         self.save_sessions()
         
         self.attendance_status_var.set(f"Time In recorded at {current_time}")
+        # Update button states
         self.time_in_btn.config(state=tk.DISABLED)
         self.time_out_btn.config(state=tk.NORMAL)
         self.auto_time_in_btn.config(state=tk.DISABLED)
@@ -670,6 +712,7 @@ class WFHAttendanceApp:
         self.save_sessions()
         
         self.attendance_status_var.set(f"Time Out recorded at {current_time}")
+        # Update button states
         self.time_in_btn.config(state=tk.NORMAL)
         self.time_out_btn.config(state=tk.DISABLED)
         self.auto_time_in_btn.config(state=tk.NORMAL)
