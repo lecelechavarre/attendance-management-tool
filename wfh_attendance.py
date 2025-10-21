@@ -23,10 +23,12 @@ class WFHAttendanceApp:
         self.sessions_file = "active_sessions.json"
         self.export_history_file = "export_history.json"
         self.users_file = "registered_users.json"
+        self.archive_file = "deleted_users_archive.json"
         self.attendance_data = self.load_data()
         self.active_sessions = self.load_sessions()
         self.export_history = self.load_export_history()
         self.registered_users = self.load_registered_users()
+        self.deleted_users_archive = self.load_archive()
         
         # Current user session
         self.current_user_id = None
@@ -167,8 +169,8 @@ class WFHAttendanceApp:
         # View Users Button
         self.view_users_btn = ttk.Button(
             login_frame,
-            text="View Registered Users",
-            command=self.view_registered_users,
+            text="Manage Users",
+            command=self.manage_users,
             style='Info.TButton'
         )
         self.view_users_btn.grid(row=0, column=6, padx=(0, 10), pady=5)
@@ -456,70 +458,138 @@ class WFHAttendanceApp:
         # Check for active session (this only affects Time In/Time Out buttons)
         self.check_active_session()
     
-    def view_registered_users(self):
-        """Show all registered users in a new window"""
-        if not self.registered_users:
-            messagebox.showinfo("Registered Users", "No users registered yet.")
+    def manage_users(self):
+        """Show user management window with delete and archive features"""
+        if not self.registered_users and not self.deleted_users_archive:
+            messagebox.showinfo("User Management", "No users registered yet.")
             return
         
         # Create new window
         users_window = tk.Toplevel(self.root)
-        users_window.title("Registered Users")
-        users_window.geometry("500x400")
+        users_window.title("User Management")
+        users_window.geometry("700x500")
         users_window.configure(bg='#f0f2f5')
         
         # Center the window
         users_window.update_idletasks()
-        width = 500
-        height = 400
+        width = 700
+        height = 500
         x = (users_window.winfo_screenwidth() // 2) - (width // 2)
         y = (users_window.winfo_screenheight() // 2) - (height // 2)
         users_window.geometry(f'{width}x{height}+{x}+{y}')
         
-        # Title
-        title_label = ttk.Label(
-            users_window,
-            text="Registered Users",
-            font=('Arial', 14, 'bold'),
-            background='#f0f2f5',
+        # Create notebook for tabs
+        notebook = ttk.Notebook(users_window)
+        notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Registered Users Tab
+        registered_frame = ttk.Frame(notebook, padding="10")
+        notebook.add(registered_frame, text="Registered Users")
+        
+        # Active Users Title
+        active_title = ttk.Label(
+            registered_frame,
+            text="Active Registered Users",
+            font=('Arial', 12, 'bold'),
             foreground='#2c3e50'
         )
-        title_label.pack(pady=10)
+        active_title.pack(pady=(0, 10))
         
-        # Create treeview with scrollbar
-        tree_frame = ttk.Frame(users_window)
-        tree_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        # Create treeview with scrollbar for registered users
+        reg_tree_frame = ttk.Frame(registered_frame)
+        reg_tree_frame.pack(fill=tk.BOTH, expand=True)
         
-        scrollbar = ttk.Scrollbar(tree_frame)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        reg_scrollbar = ttk.Scrollbar(reg_tree_frame)
+        reg_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        # Treeview
-        columns = ('user_id', 'user_name', 'registered_date')
-        users_tree = ttk.Treeview(
-            tree_frame,
-            columns=columns,
+        # Treeview for registered users
+        reg_columns = ('user_id', 'user_name', 'registered_date')
+        self.reg_users_tree = ttk.Treeview(
+            reg_tree_frame,
+            columns=reg_columns,
             show='headings',
-            yscrollcommand=scrollbar.set
+            yscrollcommand=reg_scrollbar.set
         )
         
         # Configure columns
-        users_tree.heading('user_id', text='User ID')
-        users_tree.heading('user_name', text='User Name')
-        users_tree.heading('registered_date', text='Registration Date')
+        self.reg_users_tree.heading('user_id', text='User ID')
+        self.reg_users_tree.heading('user_name', text='User Name')
+        self.reg_users_tree.heading('registered_date', text='Registration Date')
         
-        users_tree.column('user_id', width=100)
-        users_tree.column('user_name', width=150)
-        users_tree.column('registered_date', width=150)
+        self.reg_users_tree.column('user_id', width=100)
+        self.reg_users_tree.column('user_name', width=150)
+        self.reg_users_tree.column('registered_date', width=150)
         
-        users_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.config(command=users_tree.yview)
+        self.reg_users_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        reg_scrollbar.config(command=self.reg_users_tree.yview)
         
-        # Add users to treeview
+        # Add registered users to treeview
         for user in self.registered_users:
-            users_tree.insert('', tk.END, values=(
+            self.reg_users_tree.insert('', tk.END, values=(
                 user['user_id'],
                 user['user_name'],
                 user['registered_date']
+            ))
+        
+        # Delete button for registered users
+        delete_btn = ttk.Button(
+            registered_frame,
+            text="Delete Selected User",
+            command=lambda: self.delete_user(users_window),
+            style='Danger.TButton'
+        )
+        delete_btn.pack(pady=10)
+        
+        # Archive Tab
+        archive_frame = ttk.Frame(notebook, padding="10")
+        notebook.add(archive_frame, text="Deleted Users Archive")
+        
+        # Archive Title
+        archive_title = ttk.Label(
+            archive_frame,
+            text="Deleted Users Archive",
+            font=('Arial', 12, 'bold'),
+            foreground='#2c3e50'
+        )
+        archive_title.pack(pady=(0, 10))
+        
+        # Create treeview with scrollbar for archive
+        arch_tree_frame = ttk.Frame(archive_frame)
+        arch_tree_frame.pack(fill=tk.BOTH, expand=True)
+        
+        arch_scrollbar = ttk.Scrollbar(arch_tree_frame)
+        arch_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Treeview for archive
+        arch_columns = ('user_id', 'user_name', 'registered_date', 'deleted_date')
+        self.arch_users_tree = ttk.Treeview(
+            arch_tree_frame,
+            columns=arch_columns,
+            show='headings',
+            yscrollcommand=arch_scrollbar.set
+        )
+        
+        # Configure columns
+        self.arch_users_tree.heading('user_id', text='User ID')
+        self.arch_users_tree.heading('user_name', text='User Name')
+        self.arch_users_tree.heading('registered_date', text='Registration Date')
+        self.arch_users_tree.heading('deleted_date', text='Deleted Date')
+        
+        self.arch_users_tree.column('user_id', width=100)
+        self.arch_users_tree.column('user_name', width=150)
+        self.arch_users_tree.column('registered_date', width=150)
+        self.arch_users_tree.column('deleted_date', width=150)
+        
+        self.arch_users_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        arch_scrollbar.config(command=self.arch_users_tree.yview)
+        
+        # Add archived users to treeview
+        for user in self.deleted_users_archive:
+            self.arch_users_tree.insert('', tk.END, values=(
+                user['user_id'],
+                user['user_name'],
+                user['registered_date'],
+                user['deleted_date']
             ))
         
         # Close button
@@ -530,6 +600,95 @@ class WFHAttendanceApp:
             style='Primary.TButton'
         )
         close_btn.pack(pady=10)
+    
+    def delete_user(self, parent_window):
+        """Delete selected user and move to archive"""
+        selected = self.reg_users_tree.selection()
+        if not selected:
+            messagebox.showwarning("Warning", "Please select a user to delete")
+            return
+        
+        item = selected[0]
+        user_id = self.reg_users_tree.item(item, 'values')[0]
+        user_name = self.reg_users_tree.item(item, 'values')[1]
+        reg_date = self.reg_users_tree.item(item, 'values')[2]
+        
+        # Check if user has active session
+        user_sessions = [s for s in self.active_sessions if s['user_id'] == user_id]
+        if user_sessions:
+            messagebox.showerror(
+                "Cannot Delete User", 
+                f"Cannot delete user '{user_name}' ({user_id}) because they have an active session.\n\n"
+                f"Please force time out their session first from the Active Sessions tab."
+            )
+            return
+        
+        # Check if current user is trying to delete themselves
+        if user_id == self.current_user_id:
+            messagebox.showerror(
+                "Cannot Delete User", 
+                "You cannot delete your own account while logged in.\n\n"
+                "Please logout first or use a different admin account."
+            )
+            return
+        
+        # Confirm deletion
+        confirm = messagebox.askyesno(
+            "Confirm User Deletion",
+            f"Are you sure you want to delete user '{user_name}' ({user_id})?\n\n"
+            f"This action will:\n"
+            f"• Remove user from registered users\n"
+            f"• Archive user data for record keeping\n"
+            f"• User will no longer be able to login\n\n"
+            f"This action cannot be undone."
+        )
+        
+        if not confirm:
+            return
+        
+        # Find and remove user from registered users
+        user_index = None
+        user_data = None
+        for i, user in enumerate(self.registered_users):
+            if user['user_id'] == user_id:
+                user_index = i
+                user_data = user
+                break
+        
+        if user_index is not None:
+            # Create archive record
+            archive_record = {
+                'user_id': user_data['user_id'],
+                'user_name': user_data['user_name'],
+                'registered_date': user_data['registered_date'],
+                'deleted_date': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            
+            # Add to archive
+            self.deleted_users_archive.append(archive_record)
+            self.save_archive()
+            
+            # Remove from registered users
+            self.registered_users.pop(user_index)
+            self.save_registered_users()
+            
+            # Remove from treeview
+            self.reg_users_tree.delete(item)
+            
+            # Update archive treeview
+            self.arch_users_tree.insert('', tk.END, values=(
+                archive_record['user_id'],
+                archive_record['user_name'],
+                archive_record['registered_date'],
+                archive_record['deleted_date']
+            ))
+            
+            messagebox.showinfo(
+                "User Deleted", 
+                f"User '{user_name}' ({user_id}) has been deleted and moved to archive."
+            )
+        else:
+            messagebox.showerror("Error", "User not found in registered users")
     
     def handle_logout(self):
         """Handle user logout - ALWAYS allowed regardless of session status"""
@@ -938,6 +1097,24 @@ class WFHAttendanceApp:
                 json.dump(self.registered_users, f, indent=2)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save user data: {str(e)}")
+    
+    def load_archive(self) -> List[Dict]:
+        """Load deleted users archive from JSON file"""
+        try:
+            if os.path.exists(self.archive_file):
+                with open(self.archive_file, 'r') as f:
+                    return json.load(f)
+        except Exception as e:
+            print(f"Error loading archive: {e}")
+        return []
+    
+    def save_archive(self):
+        """Save deleted users archive to JSON file"""
+        try:
+            with open(self.archive_file, 'w') as f:
+                json.dump(self.deleted_users_archive, f, indent=2)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save archive: {str(e)}")
     
     def open_file(self, filepath: str):
         """Open file with default application"""
