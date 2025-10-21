@@ -21,8 +21,10 @@ class WFHAttendanceApp:
         # Initialize data storage
         self.data_file = "attendance_data.json"
         self.sessions_file = "active_sessions.json"
+        self.export_history_file = "export_history.json"
         self.attendance_data = self.load_data()
         self.active_sessions = self.load_sessions()
+        self.export_history = self.load_export_history()
         
         # Current user session
         self.current_user_id = None
@@ -86,6 +88,11 @@ class WFHAttendanceApp:
         style.configure('Danger.TButton',
                        font=('Arial', 10, 'bold'),
                        background='#e74c3c',
+                       foreground='white')
+        
+        style.configure('Info.TButton',
+                       font=('Arial', 10, 'bold'),
+                       background='#9b59b6',
                        foreground='white')
     
     def create_main_frame(self):
@@ -208,6 +215,16 @@ class WFHAttendanceApp:
         )
         self.time_out_btn.pack(side=tk.LEFT)
         
+        # Auto Time In Button
+        self.auto_time_in_btn = ttk.Button(
+            btn_frame,
+            text="Auto New Session",
+            command=self.auto_new_session,
+            style='Info.TButton',
+            state=tk.DISABLED
+        )
+        self.auto_time_in_btn.pack(side=tk.LEFT, padx=(10, 0))
+        
         # Status display
         self.attendance_status_var = tk.StringVar(value="No active session")
         self.attendance_status_label = ttk.Label(
@@ -229,7 +246,7 @@ class WFHAttendanceApp:
         # Export Button
         self.export_btn = ttk.Button(
             export_frame,
-            text="Export to Excel",
+            text="Export to Excel & Start New Session",
             command=self.export_to_excel,
             style='Primary.TButton'
         )
@@ -367,6 +384,7 @@ class WFHAttendanceApp:
         self.login_btn.config(state=tk.DISABLED)
         self.logout_btn.config(state=tk.NORMAL)
         self.time_in_btn.config(state=tk.NORMAL)
+        self.auto_time_in_btn.config(state=tk.NORMAL)
         self.user_id_entry.config(state=tk.DISABLED)
         self.user_name_entry.config(state=tk.DISABLED)
         
@@ -388,6 +406,7 @@ class WFHAttendanceApp:
         self.logout_btn.config(state=tk.DISABLED)
         self.time_in_btn.config(state=tk.DISABLED)
         self.time_out_btn.config(state=tk.DISABLED)
+        self.auto_time_in_btn.config(state=tk.DISABLED)
         self.user_id_entry.config(state=tk.NORMAL)
         self.user_name_entry.config(state=tk.NORMAL)
     
@@ -403,11 +422,13 @@ class WFHAttendanceApp:
             )
             self.time_in_btn.config(state=tk.DISABLED)
             self.time_out_btn.config(state=tk.NORMAL)
+            self.auto_time_in_btn.config(state=tk.DISABLED)
         else:
             self.current_session_id = None
             self.attendance_status_var.set("Ready for Time In")
             self.time_in_btn.config(state=tk.NORMAL)
             self.time_out_btn.config(state=tk.DISABLED)
+            self.auto_time_in_btn.config(state=tk.NORMAL)
     
     def time_in(self):
         """Record time in with session management"""
@@ -421,6 +442,10 @@ class WFHAttendanceApp:
             messagebox.showerror("Error", "You already have an active session!")
             return
         
+        self.create_new_session()
+    
+    def create_new_session(self):
+        """Create a new time-in session for the current user"""
         current_time = datetime.now().strftime("%H:%M:%S")
         today = datetime.now().strftime("%Y-%m-%d")
         
@@ -446,12 +471,35 @@ class WFHAttendanceApp:
         self.attendance_status_var.set(f"Time In recorded at {current_time}")
         self.time_in_btn.config(state=tk.DISABLED)
         self.time_out_btn.config(state=tk.NORMAL)
+        self.auto_time_in_btn.config(state=tk.DISABLED)
         
         self.update_sessions_display()
         messagebox.showinfo("Success", "Time In recorded successfully!")
     
+    def auto_new_session(self):
+        """Automatically create a new session without time out"""
+        if not self.current_user_id:
+            messagebox.showerror("Error", "Please login first")
+            return
+        
+        # Check if user already has active session
+        user_sessions = [s for s in self.active_sessions if s['user_id'] == self.current_user_id]
+        if user_sessions:
+            messagebox.showerror("Error", "You already have an active session!")
+            return
+        
+        # Confirm with user
+        confirm = messagebox.askyesno(
+            "Auto New Session", 
+            "This will create a new Time In session without Time Out.\n\n"
+            "Are you sure you want to start a new session?"
+        )
+        
+        if confirm:
+            self.create_new_session()
+    
     def time_out(self):
-        """Record time out with session management"""
+        """Record time out with user validation"""
         if not self.current_session_id:
             messagebox.showerror("Error", "No active session found")
             return
@@ -467,6 +515,18 @@ class WFHAttendanceApp:
         
         if session_index is None:
             messagebox.showerror("Error", "Session not found")
+            return
+        
+        # Validate user credentials against the session
+        current_user_id = self.user_id_var.get().strip()
+        current_user_name = self.user_name_var.get().strip()
+        
+        session_user_id = session_data['user_id']
+        session_user_name = session_data['user_name']
+        
+        # Check if credentials match the session
+        if current_user_id != session_user_id or current_user_name != session_user_name:
+            self.show_validation_error(session_user_id, session_user_name)
             return
         
         current_time = datetime.now().strftime("%H:%M:%S")
@@ -495,10 +555,43 @@ class WFHAttendanceApp:
         self.attendance_status_var.set(f"Time Out recorded at {current_time}")
         self.time_in_btn.config(state=tk.NORMAL)
         self.time_out_btn.config(state=tk.DISABLED)
+        self.auto_time_in_btn.config(state=tk.NORMAL)
         
         self.update_records_display()
         self.update_sessions_display()
         messagebox.showinfo("Success", "Time Out recorded successfully!")
+    
+    def show_validation_error(self, session_user_id: str, session_user_name: str):
+        """Show error message when user credentials don't match the session"""
+        error_message = (
+            "User credentials do not match the active session!\n\n"
+            f"Active session belongs to:\n"
+            f"User ID: {session_user_id}\n"
+            f"User Name: {session_user_name}\n\n"
+            "Please enter the correct User ID and User Name that match the active session."
+        )
+        
+        messagebox.showerror("Validation Error", error_message)
+        
+        # Highlight the input fields to indicate error
+        self.highlight_validation_error()
+    
+    def highlight_validation_error(self):
+        """Temporarily highlight the input fields in red to indicate error"""
+        # Apply error styling
+        error_style = ttk.Style()
+        error_style.configure('Error.TEntry', fieldbackground='#ffebee', foreground='#c62828')
+        
+        self.user_id_entry.configure(style='Error.TEntry')
+        self.user_name_entry.configure(style='Error.TEntry')
+        
+        # Reset after 3 seconds
+        self.root.after(3000, lambda: self.reset_input_styles())
+    
+    def reset_input_styles(self):
+        """Reset input field styles to normal"""
+        self.user_id_entry.configure(style='TEntry')
+        self.user_name_entry.configure(style='TEntry')
     
     def force_time_out(self):
         """Force time out for selected session (admin feature)"""
@@ -547,6 +640,7 @@ class WFHAttendanceApp:
             self.attendance_status_var.set("Ready for Time In")
             self.time_in_btn.config(state=tk.NORMAL)
             self.time_out_btn.config(state=tk.DISABLED)
+            self.auto_time_in_btn.config(state=tk.NORMAL)
         
         # Save data
         self.save_data()
@@ -567,7 +661,7 @@ class WFHAttendanceApp:
         return f"{int(hours):02d}:{int(minutes):02d}"
     
     def export_to_excel(self):
-        """Export attendance data to Excel and show file path"""
+        """Export attendance data to Excel, clear records, and start new session"""
         if not self.attendance_data:
             messagebox.showwarning("Warning", "No attendance data to export")
             return
@@ -589,14 +683,83 @@ class WFHAttendanceApp:
             # Update export path label
             self.export_path_var.set(f"Exported to: {abs_path}")
             
-            messagebox.showinfo("Success", f"Data exported to:\n{abs_path}")
+            # Save export history
+            self.save_export_history(abs_path, len(self.attendance_data))
+            
+            # Clear all attendance records after successful export
+            records_count = len(self.attendance_data)
+            self.attendance_data.clear()
+            self.save_data()
+            
+            # Show success message
+            messagebox.showinfo(
+                "Success", 
+                f"Data exported successfully!\n\n"
+                f"Exported {records_count} records to:\n{abs_path}\n\n"
+                f"All attendance records have been cleared from the system."
+            )
+            
+            # Update records display
+            self.update_records_display()
             
             # Ask if user wants to open the file
             if messagebox.askyesno("Open File", "Do you want to open the Excel file?"):
                 self.open_file(abs_path)
+            
+            # Automatically create new session if user is logged in and doesn't have active session
+            if self.current_user_id and not self.current_session_id:
+                self.auto_create_session_after_export()
                 
         except Exception as e:
             messagebox.showerror("Error", f"Failed to export data: {str(e)}")
+    
+    def auto_create_session_after_export(self):
+        """Automatically create a new session after exporting to Excel and clearing records"""
+        if not self.current_user_id:
+            return
+        
+        # Check if user already has active session
+        user_sessions = [s for s in self.active_sessions if s['user_id'] == self.current_user_id]
+        if user_sessions:
+            return
+        
+        # Ask user if they want to start a new session
+        response = messagebox.askyesno(
+            "Fresh Start", 
+            "All previous records have been exported and cleared.\n\n"
+            "Would you like to start a fresh new session?"
+        )
+        
+        if response:
+            self.create_new_session()
+            messagebox.showinfo("New Session", "New session started! Ready for fresh attendance tracking.")
+    
+    def save_export_history(self, filepath: str, record_count: int):
+        """Save export history for tracking"""
+        export_record = {
+            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'filepath': filepath,
+            'record_count': record_count,
+            'user_id': self.current_user_id
+        }
+        
+        self.export_history.append(export_record)
+        
+        try:
+            with open(self.export_history_file, 'w') as f:
+                json.dump(self.export_history, f, indent=2)
+        except Exception as e:
+            print(f"Error saving export history: {e}")
+    
+    def load_export_history(self) -> List[Dict]:
+        """Load export history from JSON file"""
+        try:
+            if os.path.exists(self.export_history_file):
+                with open(self.export_history_file, 'r') as f:
+                    return json.load(f)
+        except Exception as e:
+            print(f"Error loading export history: {e}")
+        return []
     
     def open_file(self, filepath: str):
         """Open file with default application"""
