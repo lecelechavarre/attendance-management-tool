@@ -22,9 +22,11 @@ class WFHAttendanceApp:
         self.data_file = "attendance_data.json"
         self.sessions_file = "active_sessions.json"
         self.export_history_file = "export_history.json"
+        self.users_file = "registered_users.json"
         self.attendance_data = self.load_data()
         self.active_sessions = self.load_sessions()
         self.export_history = self.load_export_history()
+        self.registered_users = self.load_registered_users()
         
         # Current user session
         self.current_user_id = None
@@ -112,7 +114,7 @@ class WFHAttendanceApp:
         """Create user login section"""
         login_frame = ttk.LabelFrame(
             self.main_frame,
-            text="User Login",
+            text="User Login / Registration",
             padding="15"
         )
         login_frame.pack(fill=tk.X, pady=(0, 10))
@@ -162,6 +164,15 @@ class WFHAttendanceApp:
         )
         self.logout_btn.grid(row=0, column=5, padx=(0, 10), pady=5)
         
+        # View Users Button
+        self.view_users_btn = ttk.Button(
+            login_frame,
+            text="View Registered Users",
+            command=self.view_registered_users,
+            style='Info.TButton'
+        )
+        self.view_users_btn.grid(row=0, column=6, padx=(0, 10), pady=5)
+        
         # Status Label
         self.login_status_var = tk.StringVar(value="Please login to continue")
         self.login_status_label = ttk.Label(
@@ -170,7 +181,7 @@ class WFHAttendanceApp:
             foreground='#e74c3c',
             font=('Arial', 9)
         )
-        self.login_status_label.grid(row=1, column=0, columnspan=6, sticky=tk.W, pady=(5, 0))
+        self.login_status_label.grid(row=1, column=0, columnspan=7, sticky=tk.W, pady=(5, 0))
     
     def create_attendance_section(self):
         """Create attendance recording section"""
@@ -365,14 +376,43 @@ class WFHAttendanceApp:
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         return f"{user_id}_{timestamp}"
     
+    def check_duplicate_user(self, user_id: str, user_name: str) -> tuple:
+        """Check if User ID or User Name already exists"""
+        for user in self.registered_users:
+            if user['user_id'].lower() == user_id.lower():
+                return True, f"User ID '{user_id}' is already registered to '{user['user_name']}'"
+            if user['user_name'].lower() == user_name.lower():
+                return True, f"User Name '{user_name}' is already registered to User ID '{user['user_id']}'"
+        return False, ""
+    
+    def register_new_user(self, user_id: str, user_name: str):
+        """Register a new user"""
+        new_user = {
+            'user_id': user_id,
+            'user_name': user_name,
+            'registered_date': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        self.registered_users.append(new_user)
+        self.save_registered_users()
+    
     def handle_login(self):
-        """Handle user login/registration"""
+        """Handle user login/registration with duplicate validation"""
         user_id = self.user_id_var.get().strip()
         user_name = self.user_name_var.get().strip()
         
         if not user_id or not user_name:
             messagebox.showerror("Error", "Please enter both User ID and User Name")
             return
+        
+        # Check for duplicates
+        is_duplicate, error_message = self.check_duplicate_user(user_id, user_name)
+        
+        if is_duplicate:
+            messagebox.showerror("Duplicate User", error_message)
+            return
+        
+        # Register new user
+        self.register_new_user(user_id, user_name)
         
         self.current_user_id = user_id
         
@@ -390,6 +430,83 @@ class WFHAttendanceApp:
         
         # Check for active session
         self.check_active_session()
+        
+        messagebox.showinfo("Registration Successful", f"User '{user_name}' ({user_id}) registered successfully!")
+    
+    def view_registered_users(self):
+        """Show all registered users in a new window"""
+        if not self.registered_users:
+            messagebox.showinfo("Registered Users", "No users registered yet.")
+            return
+        
+        # Create new window
+        users_window = tk.Toplevel(self.root)
+        users_window.title("Registered Users")
+        users_window.geometry("500x400")
+        users_window.configure(bg='#f0f2f5')
+        
+        # Center the window
+        users_window.update_idletasks()
+        width = 500
+        height = 400
+        x = (users_window.winfo_screenwidth() // 2) - (width // 2)
+        y = (users_window.winfo_screenheight() // 2) - (height // 2)
+        users_window.geometry(f'{width}x{height}+{x}+{y}')
+        
+        # Title
+        title_label = ttk.Label(
+            users_window,
+            text="Registered Users",
+            font=('Arial', 14, 'bold'),
+            background='#f0f2f5',
+            foreground='#2c3e50'
+        )
+        title_label.pack(pady=10)
+        
+        # Create treeview with scrollbar
+        tree_frame = ttk.Frame(users_window)
+        tree_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        scrollbar = ttk.Scrollbar(tree_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Treeview
+        columns = ('user_id', 'user_name', 'registered_date')
+        users_tree = ttk.Treeview(
+            tree_frame,
+            columns=columns,
+            show='headings',
+            yscrollcommand=scrollbar.set
+        )
+        
+        # Configure columns
+        users_tree.heading('user_id', text='User ID')
+        users_tree.heading('user_name', text='User Name')
+        users_tree.heading('registered_date', text='Registration Date')
+        
+        users_tree.column('user_id', width=100)
+        users_tree.column('user_name', width=150)
+        users_tree.column('registered_date', width=150)
+        
+        users_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.config(command=users_tree.yview)
+        
+        # Add users to treeview
+        for user in self.registered_users:
+            users_tree.insert('', tk.END, values=(
+                user['user_id'],
+                user['user_name'],
+                user['registered_date']
+            ))
+        
+        # Close button
+        close_btn = ttk.Button(
+            users_window,
+            text="Close",
+            command=users_window.destroy,
+            style='Primary.TButton'
+        )
+        close_btn.pack(pady=10)
     
     def handle_logout(self):
         """Handle user logout"""
@@ -760,6 +877,24 @@ class WFHAttendanceApp:
         except Exception as e:
             print(f"Error loading export history: {e}")
         return []
+    
+    def load_registered_users(self) -> List[Dict]:
+        """Load registered users from JSON file"""
+        try:
+            if os.path.exists(self.users_file):
+                with open(self.users_file, 'r') as f:
+                    return json.load(f)
+        except Exception as e:
+            print(f"Error loading registered users: {e}")
+        return []
+    
+    def save_registered_users(self):
+        """Save registered users to JSON file"""
+        try:
+            with open(self.users_file, 'w') as f:
+                json.dump(self.registered_users, f, indent=2)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save user data: {str(e)}")
     
     def open_file(self, filepath: str):
         """Open file with default application"""
