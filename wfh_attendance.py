@@ -32,6 +32,8 @@ class WFHAttendanceApp:
         self.archive_file = "deleted_users_archive.json"
         self.admin_file = "admin_users.json"
         self.roles_file = "roles_users.json"
+        
+        # Load data first
         self.attendance_data = self.load_data()
         self.active_sessions = self.load_sessions()
         self.export_history = self.load_export_history()
@@ -39,6 +41,9 @@ class WFHAttendanceApp:
         self.deleted_users_archive = self.load_archive()
         self.admin_users = self.load_admin_users()
         self.roles_users = self.load_roles_users()
+        
+        # Create default admin account if it doesn't exist
+        self.create_default_admin()
         
         # Current user session
         self.current_user_id = None
@@ -57,6 +62,38 @@ class WFHAttendanceApp:
         
         # Initially hide features based on role
         self.toggle_features_based_on_role()
+
+    def create_default_admin(self):
+        """Create default admin account if it doesn't exist"""
+        admin_exists = False
+        
+        # Check if admin user exists in registered users
+        for user in self.registered_users:
+            if user['user_id'].lower() == 'admin':
+                admin_exists = True
+                break
+        
+        # If admin doesn't exist, create it
+        if not admin_exists:
+            default_admin = {
+                'user_id': 'admin',
+                'user_name': 'administrator',
+                'registered_date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'role': 'admin'
+            }
+            self.registered_users.append(default_admin)
+            self.save_registered_users()
+            
+            # Add to admin users list
+            admin_user = {
+                'user_id': 'admin',
+                'user_name': 'administrator',
+                'admin_since': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            self.admin_users.append(admin_user)
+            self.save_admin_users()
+            
+            print("Default admin account created: admin/administrator")
 
     def center_window(self):
         """Center the window on the screen"""
@@ -1305,41 +1342,68 @@ class WFHAttendanceApp:
             
             self.save_export_history(filepath, len(export_data))
             
-            # CONDITION 4: For roles users - don't auto time in, just create new session and clear records
+            # CONDITION 1: For Roles Users - Clear attendance records for Regular and Roles Users only
             if self.user_role == 'roles':
                 messagebox.showinfo(
                     "Success", 
                     f"Data exported successfully!\n\n"
                     f"Exported {len(export_data)} records to:\n{filepath}\n\n"
-                    f"Starting new session for the day. Today's attendance records have been cleared."
+                    f"Attendance records for Regular and Roles Users have been cleared. Your session has been reset."
                 )
                 
-                # Create new session for roles user after export (NO AUTO TIME IN)
-                if self.current_user_id and not self.current_session_id:
-                    self.create_new_session()
+                # **CONDITION 1: Clear attendance records for Regular and Roles Users only**
+                # Remove attendance records for Regular and Roles Users, keep Admin records
+                records_before = len(self.attendance_data)
+                self.attendance_data = [
+                    record for record in self.attendance_data 
+                    if self.get_user_role(record['user_id']) == 'admin'
+                ]
+                records_after = len(self.attendance_data)
+                records_cleared = records_before - records_after
                 
-                # Clear ALL attendance records for the current day for ALL users
-                today = datetime.now().strftime("%Y-%m-%d")
-                records_before_clear = len(self.attendance_data)
-                self.attendance_data = [record for record in self.attendance_data if record['date'] != today]
-                records_after_clear = len(self.attendance_data)
-                records_cleared = records_before_clear - records_after_clear
+                # **CONDITION 1: Clear sessions for Regular and Roles Users only**
+                # Remove active sessions for Regular and Roles Users, keep Admin sessions
+                sessions_before = len(self.active_sessions)
+                self.active_sessions = [
+                    session for session in self.active_sessions
+                    if self.get_user_role(session['user_id']) == 'admin'
+                ]
+                sessions_after = len(self.active_sessions)
+                sessions_cleared = sessions_before - sessions_after
                 
+                # Save the changes
                 self.save_data()
+                self.save_sessions()
                 
-                # Update display to show cleared records
+                # Update displays
                 self.update_records_display()
+                self.update_sessions_display()
                 
-                print(f"Cleared {records_cleared} attendance records for today ({today})")
+                print(f"Roles User export: Cleared {records_cleared} attendance records and {sessions_cleared} sessions for Regular and Roles Users")
                 
             else:
-                # CONDITION 2: Admin export doesn't affect attendance records
+                # CONDITION 2: For Admin Users - Clear ALL attendance records after export
                 messagebox.showinfo(
                     "Success", 
                     f"Data exported successfully!\n\n"
                     f"Exported {len(export_data)} records to:\n{filepath}\n\n"
-                    f"Attendance records remain unchanged for admin export."
+                    f"All attendance records have been cleared after export."
                 )
+                
+                # **CONDITION 2: Clear ALL attendance records for Admin export**
+                records_cleared = len(self.attendance_data)
+                self.attendance_data = []  # Clear all attendance data
+                self.active_sessions = []  # Clear all active sessions
+                
+                # Save the changes
+                self.save_data()
+                self.save_sessions()
+                
+                # Update displays
+                self.update_records_display()
+                self.update_sessions_display()
+                
+                print(f"Admin export: Cleared {records_cleared} attendance records and all sessions")
             
             if messagebox.askyesno("Open File", "Do you want to open the Excel file?"):
                 self.open_file(filepath)
