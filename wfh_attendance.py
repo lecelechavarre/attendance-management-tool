@@ -13,7 +13,7 @@ class WFHAttendanceApp:
         self.root = root
         self.root.title("WFH Attendance System")
         self.root.geometry("1200x800")
-        self.root.configure(bg='#f8fafc')
+        self.root.configure(bg='#fafafa')  # Soft off-white background
         
         # Set window icon (you can add an icon file if needed)
         try:
@@ -45,8 +45,8 @@ class WFHAttendanceApp:
         self.current_session_id = None
         self.user_role = None  # 'admin', 'roles', 'regular'
         
-        # Configure modern styles
-        self.setup_modern_styles()
+        # Configure modern styles with pastel colors
+        self.setup_pastel_styles()
         
         # Create modern UI
         self.create_modern_ui()
@@ -67,53 +67,60 @@ class WFHAttendanceApp:
         y = (self.root.winfo_screenheight() // 2) - (height // 2)
         self.root.geometry(f'{width}x{height}+{x}+{y}')
 
-    def setup_modern_styles(self):
-        """Configure modern, professional styles"""
+    def setup_pastel_styles(self):
+        """Configure modern, professional styles with pastel colors"""
         style = ttk.Style()
         style.theme_use('clam')
         
-        # Color scheme - Modern professional palette
+        # Pastel color scheme - Soft and pleasing to the eye
         self.colors = {
-            'primary': '#3b82f6',
-            'primary_dark': '#1d4ed8',
-            'secondary': '#64748b',
-            'success': '#10b981',
-            'warning': '#f59e0b',
-            'danger': '#ef4444',
-            'info': '#8b5cf6',
-            'light': '#f8fafc',
-            'dark': '#1e293b',
-            'gray': '#94a3b8',
-            'border': '#e2e8f0'
+            'primary': '#a8d8ea',      # Soft blue
+            'primary_dark': '#88b8d4',  # Muted blue
+            'secondary': '#c9c9c9',     # Light gray
+            'success': '#b5e8c3',       # Mint green
+            'success_dark': '#95d8a8',  # Darker mint
+            'warning': '#ffd8a6',       # Peach
+            'warning_dark': '#ffc885',  # Darker peach
+            'danger': '#ffb3b3',        # Soft pink/red
+            'danger_dark': '#ff9999',   # Darker pink
+            'info': '#d4c4fb',          # Lavender
+            'info_dark': '#c1acf9',     # Darker lavender
+            'light': '#fafafa',         # Off-white
+            'dark': '#6b7280',          # Soft gray
+            'gray': '#d1d5db',          # Light gray
+            'border': '#e5e7eb',        # Very light gray
+            'card_bg': '#ffffff',       # White cards
+            'text_light': '#6b7280',    # Soft text
+            'text_dark': '#374151'      # Darker text
         }
         
         # Configure styles
         style.configure('Modern.TFrame', background=self.colors['light'])
-        style.configure('Card.TFrame', background='white', relief='flat', borderwidth=0)
+        style.configure('Card.TFrame', background=self.colors['card_bg'], relief='flat', borderwidth=0)
         
         # Title label
         style.configure('Title.TLabel',
                        font=('Segoe UI', 24, 'bold'),
                        background=self.colors['light'],
-                       foreground=self.colors['dark'])
+                       foreground=self.colors['text_dark'])
         
         # Section titles
         style.configure('Section.TLabel',
                        font=('Segoe UI', 14, 'bold'),
-                       background='white',
-                       foreground=self.colors['dark'])
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text_dark'])
         
         # Regular labels
         style.configure('Modern.TLabel',
                        font=('Segoe UI', 10),
-                       background='white',
-                       foreground=self.colors['dark'])
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text_dark'])
         
         # Entry fields
         style.configure('Modern.TEntry',
                        font=('Segoe UI', 10),
                        fieldbackground='white',
-                       borderwidth=2,
+                       borderwidth=1,
                        relief='solid',
                        focusthickness=2,
                        focuscolor=self.colors['primary'])
@@ -122,7 +129,7 @@ class WFHAttendanceApp:
         style.configure('Primary.TButton',
                        font=('Segoe UI', 10, 'bold'),
                        background=self.colors['primary'],
-                       foreground='white',
+                       foreground=self.colors['text_dark'],
                        borderwidth=0,
                        focuscolor='none',
                        padding=(20, 10))
@@ -134,73 +141,74 @@ class WFHAttendanceApp:
         style.configure('Success.TButton',
                        font=('Segoe UI', 10, 'bold'),
                        background=self.colors['success'],
-                       foreground='white',
+                       foreground=self.colors['text_dark'],
                        borderwidth=0,
                        focuscolor='none',
                        padding=(20, 10))
         style.map('Success.TButton',
-                 background=[('active', '#059669'),
-                           ('pressed', '#047857')])
+                 background=[('active', self.colors['success_dark']),
+                           ('pressed', self.colors['success_dark'])])
         
         # Warning button
         style.configure('Warning.TButton',
                        font=('Segoe UI', 10, 'bold'),
                        background=self.colors['warning'],
-                       foreground='white',
+                       foreground=self.colors['text_dark'],
                        borderwidth=0,
                        focuscolor='none',
                        padding=(20, 10))
         style.map('Warning.TButton',
-                 background=[('active', '#d97706'),
-                           ('pressed', '#b45309')])
+                 background=[('active', self.colors['warning_dark']),
+                           ('pressed', self.colors['warning_dark'])])
         
         # Danger button
         style.configure('Danger.TButton',
                        font=('Segoe UI', 10, 'bold'),
                        background=self.colors['danger'],
-                       foreground='white',
+                       foreground=self.colors['text_dark'],
                        borderwidth=0,
                        focuscolor='none',
                        padding=(20, 10))
         style.map('Danger.TButton',
-                 background=[('active', '#dc2626'),
-                           ('pressed', '#b91c1c')])
+                 background=[('active', self.colors['danger_dark']),
+                           ('pressed', self.colors['danger_dark'])])
         
         # Info button
         style.configure('Info.TButton',
                        font=('Segoe UI', 10, 'bold'),
                        background=self.colors['info'],
-                       foreground='white',
+                       foreground=self.colors['text_dark'],
                        borderwidth=0,
                        focuscolor='none',
                        padding=(20, 10))
         style.map('Info.TButton',
-                 background=[('active', '#7c3aed'),
-                           ('pressed', '#6d28d9')])
+                 background=[('active', self.colors['info_dark']),
+                           ('pressed', self.colors['info_dark'])])
         
         # Roles button
         style.configure('Roles.TButton',
                        font=('Segoe UI', 10, 'bold'),
-                       background='#ec4899',
-                       foreground='white',
+                       background='#f8c6e6',  # Pastel pink
+                       foreground=self.colors['text_dark'],
                        borderwidth=0,
                        focuscolor='none',
                        padding=(20, 10))
         style.map('Roles.TButton',
-                 background=[('active', '#db2777'),
-                           ('pressed', '#be185d')])
+                 background=[('active', '#f4b2de'),
+                           ('pressed', '#f09fd6')])
         
         # Treeview style
         style.configure('Modern.Treeview',
                        font=('Segoe UI', 9),
-                       rowheight=25,
+                       rowheight=28,
                        background='white',
                        fieldbackground='white',
-                       foreground=self.colors['dark'])
+                       foreground=self.colors['text_dark'],
+                       borderwidth=0)
         style.configure('Modern.Treeview.Heading',
                        font=('Segoe UI', 10, 'bold'),
                        background=self.colors['primary'],
-                       foreground='white',
+                       foreground=self.colors['text_dark'],
                        relief='flat')
         style.map('Modern.Treeview.Heading',
                  background=[('active', self.colors['primary_dark'])])
@@ -213,7 +221,7 @@ class WFHAttendanceApp:
                        font=('Segoe UI', 10, 'bold'),
                        padding=(20, 10),
                        background=self.colors['gray'],
-                       foreground='white')
+                       foreground=self.colors['text_dark'])
         style.map('Modern.TNotebook.Tab',
                  background=[('selected', self.colors['primary']),
                            ('active', self.colors['primary_dark'])])
@@ -223,18 +231,18 @@ class WFHAttendanceApp:
                        font=('Segoe UI', 10),
                        background='white',
                        fieldbackground='white',
-                       borderwidth=2,
+                       borderwidth=1,
                        relief='solid')
         
         # Checkbutton style
         style.configure('Modern.TCheckbutton',
                        font=('Segoe UI', 10),
-                       background='white',
-                       foreground=self.colors['dark'])
+                       background=self.colors['card_bg'],
+                       foreground=self.colors['text_dark'])
 
     def create_modern_ui(self):
         """Create modern, professional UI"""
-        # Main container with gradient-like background
+        # Main container with soft background
         self.main_container = ttk.Frame(self.root, style='Modern.TFrame')
         self.main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
@@ -249,9 +257,18 @@ class WFHAttendanceApp:
         header_frame = ttk.Frame(self.main_container, style='Card.TFrame')
         header_frame.pack(fill=tk.X, pady=(0, 20))
         
+        # Add subtle rounded corners effect with a canvas
+        header_canvas = tk.Canvas(header_frame, height=80, bg=self.colors['card_bg'], 
+                                 highlightthickness=0, relief='flat')
+        header_canvas.pack(fill=tk.X, padx=0, pady=0)
+        
+        # Draw rounded rectangle background
+        header_canvas.create_rectangle(0, 0, 1200, 80, fill=self.colors['primary'], 
+                                      outline=self.colors['primary'], width=0)
+        
         # Header content with padding
         header_content = ttk.Frame(header_frame, style='Card.TFrame')
-        header_content.pack(fill=tk.X, padx=30, pady=20)
+        header_content.place(relx=0.5, rely=0.5, anchor='center', width=1160, height=60)
         
         # Logo and title
         title_frame = ttk.Frame(header_content, style='Card.TFrame')
@@ -271,8 +288,8 @@ class WFHAttendanceApp:
             title_frame,
             textvariable=self.time_display_var,
             font=('Segoe UI', 11, 'bold'),
-            background='white',
-            foreground=self.colors['secondary']
+            background=self.colors['primary'],
+            foreground=self.colors['text_dark']
         )
         time_label.pack(side=tk.RIGHT)
         
@@ -329,6 +346,9 @@ class WFHAttendanceApp:
             padding="20"
         )
         login_card.pack(fill=tk.X, pady=(0, 20))
+        
+        # Add subtle shadow effect
+        login_card.configure(relief='raised', borderwidth=1)
         
         # User ID
         ttk.Label(login_card, text="User ID:", style='Modern.TLabel').pack(anchor=tk.W, pady=(0, 5))
@@ -393,8 +413,8 @@ class WFHAttendanceApp:
             login_card,
             textvariable=self.login_status_var,
             font=('Segoe UI', 9),
-            background='white',
-            foreground=self.colors['danger']
+            background=self.colors['card_bg'],
+            foreground=self.colors['text_light']
         )
         self.login_status_label.pack(fill=tk.X, pady=(15, 0))
 
@@ -407,6 +427,7 @@ class WFHAttendanceApp:
             padding="20"
         )
         attendance_card.pack(fill=tk.X, pady=(0, 20))
+        attendance_card.configure(relief='raised', borderwidth=1)
         
         # Status display
         self.attendance_status_var = tk.StringVar(value="No active session")
@@ -414,8 +435,8 @@ class WFHAttendanceApp:
             attendance_card,
             textvariable=self.attendance_status_var,
             font=('Segoe UI', 12, 'bold'),
-            background='white',
-            foreground=self.colors['primary']
+            background=self.colors['card_bg'],
+            foreground=self.colors['primary_dark']
         )
         status_label.pack(pady=(0, 20))
         
@@ -461,6 +482,7 @@ class WFHAttendanceApp:
             style='Card.TFrame',
             padding="20"
         )
+        self.export_card.configure(relief='raised', borderwidth=1)
         
         # Export Button (Admin and Roles only)
         self.export_btn = ttk.Button(
@@ -477,8 +499,8 @@ class WFHAttendanceApp:
             self.export_card,
             textvariable=self.export_path_var,
             font=('Segoe UI', 8),
-            background='white',
-            foreground=self.colors['secondary']
+            background=self.colors['card_bg'],
+            foreground=self.colors['text_light']
         )
         self.export_path_label.pack(fill=tk.X, pady=(10, 0))
 
@@ -533,6 +555,10 @@ class WFHAttendanceApp:
         
         self.records_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.config(command=self.records_tree.yview)
+        
+        # Add alternating row colors
+        self.records_tree.tag_configure('evenrow', background=self.colors['light'])
+        self.records_tree.tag_configure('oddrow', background='white')
 
     def create_sessions_tab(self):
         """Create modern sessions tab"""
@@ -585,6 +611,10 @@ class WFHAttendanceApp:
         self.sessions_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.config(command=self.sessions_tree.yview)
         
+        # Add alternating row colors
+        self.sessions_tree.tag_configure('evenrow', background=self.colors['light'])
+        self.sessions_tree.tag_configure('oddrow', background='white')
+        
         # Force time out button (Admin only)
         self.force_out_btn = ttk.Button(
             content_frame,
@@ -627,17 +657,7 @@ class WFHAttendanceApp:
             self.auto_time_in_btn.pack_forget()
 
     # ... (All the existing functional methods remain exactly the same)
-    # get_user_role, generate_session_id, check_duplicate_user, register_new_user,
-    # handle_login, manage_users, handle_logout, check_active_session, time_in,
-    # create_new_session, auto_new_session, time_out, show_validation_error,
-    # force_time_out, calculate_duration, export_to_excel, save_export_history,
-    # load_export_history, load_registered_users, save_registered_users,
-    # load_admin_users, save_admin_users, load_roles_users, save_roles_users,
-    # load_archive, save_archive, open_file, update_records_display,
-    # update_sessions_display, load_data, load_sessions, save_data, save_sessions
-
-    # Include all the existing functional methods here without changes
-    # They should be copied exactly as they were in the previous version
+    # Only the color scheme and visual styling has been changed
 
     def get_user_role(self, user_id: str) -> str:
         """Get user role: admin, roles, or regular"""
@@ -735,7 +755,7 @@ class WFHAttendanceApp:
             # Update status with role indicator
             role_icon = "👑" if self.user_role == 'admin' else "⚡" if self.user_role == 'roles' else "👤"
             self.login_status_var.set(f"{role_icon} Logged in as: {user_name} ({user_id}) - {role_msg}")
-            self.login_status_label.configure(foreground=self.colors['success'])
+            self.login_status_label.configure(foreground=self.colors['success_dark'])
             
             # Enable/disable buttons based on role
             self.login_btn.config(state=tk.DISABLED)
@@ -764,7 +784,7 @@ class WFHAttendanceApp:
             messagebox.showerror("Access Denied", "Only administrators can manage users.")
             return
             
-        # Create modern user management window
+        # Create modern user management window with pastel colors
         users_window = tk.Toplevel(self.root)
         users_window.title("User Management - Admin")
         users_window.geometry("900x650")
@@ -793,6 +813,7 @@ class WFHAttendanceApp:
         # Registration Card
         reg_card = ttk.LabelFrame(main_container, text="➕ Register New User", style='Card.TFrame', padding="20")
         reg_card.pack(fill=tk.X, pady=(0, 20))
+        reg_card.configure(relief='raised', borderwidth=1)
         
         # Registration form
         form_frame = ttk.Frame(reg_card, style='Card.TFrame')
@@ -871,6 +892,7 @@ class WFHAttendanceApp:
         # Users List Card
         list_card = ttk.LabelFrame(main_container, text="📋 Registered Users", style='Card.TFrame', padding="20")
         list_card.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
+        list_card.configure(relief='raised', borderwidth=1)
         
         # Create treeview with scrollbar
         tree_frame = ttk.Frame(list_card, style='Card.TFrame')
@@ -904,19 +926,24 @@ class WFHAttendanceApp:
         users_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.config(command=users_tree.yview)
         
+        # Add alternating row colors
+        users_tree.tag_configure('evenrow', background=self.colors['light'])
+        users_tree.tag_configure('oddrow', background='white')
+        
         def refresh_user_list():
             # Clear existing items
             for item in users_tree.get_children():
                 users_tree.delete(item)
             
-            # Add users to treeview
-            for user in self.registered_users:
+            # Add users to treeview with alternating colors
+            for i, user in enumerate(self.registered_users):
+                tag = 'evenrow' if i % 2 == 0 else 'oddrow'
                 users_tree.insert('', tk.END, values=(
                     user['user_id'],
                     user['user_name'],
                     user.get('role', 'regular'),
                     user['registered_date']
-                ))
+                ), tags=(tag,))
         
         def delete_selected_user():
             selected = users_tree.selection()
@@ -981,7 +1008,7 @@ class WFHAttendanceApp:
         # Initial load
         refresh_user_list()
 
-    # ... (Include all other existing methods exactly as they were)
+    # ... (Include all other existing methods exactly as they were, only updating color references where needed)
 
     def handle_logout(self):
         """Handle user logout"""
@@ -1001,7 +1028,7 @@ class WFHAttendanceApp:
         
         # Update status
         self.login_status_var.set("Please login to continue")
-        self.login_status_label.configure(foreground=self.colors['danger'])
+        self.login_status_label.configure(foreground=self.colors['text_light'])
         self.attendance_status_var.set("No active session")
         
         # Enable/disable buttons
@@ -1464,8 +1491,9 @@ class WFHAttendanceApp:
             # Regular and Roles users see only their own records
             display_data = [record for record in self.attendance_data if record['user_id'] == self.current_user_id]
         
-        # Add records (show latest first)
-        for record in reversed(display_data):
+        # Add records (show latest first) with alternating colors
+        for i, record in enumerate(reversed(display_data)):
+            tag = 'evenrow' if i % 2 == 0 else 'oddrow'
             self.records_tree.insert(
                 '', tk.END,
                 values=(
@@ -1475,7 +1503,8 @@ class WFHAttendanceApp:
                     record['time_in'],
                     record['time_out'],
                     record['duration']
-                )
+                ),
+                tags=(tag,)
             )
 
     def update_sessions_display(self):
@@ -1484,8 +1513,9 @@ class WFHAttendanceApp:
         for item in self.sessions_tree.get_children():
             self.sessions_tree.delete(item)
         
-        # Add active sessions
-        for session in self.active_sessions:
+        # Add active sessions with alternating colors
+        for i, session in enumerate(self.active_sessions):
+            tag = 'evenrow' if i % 2 == 0 else 'oddrow'
             self.sessions_tree.insert(
                 '', tk.END,
                 values=(
@@ -1494,7 +1524,8 @@ class WFHAttendanceApp:
                     session['user_name'],
                     session['date'],
                     session['time_in']
-                )
+                ),
+                tags=(tag,)
             )
 
     def load_data(self) -> List[Dict]:
