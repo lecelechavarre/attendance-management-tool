@@ -12,8 +12,8 @@ class WFHAttendanceApp:
     def __init__(self, root):
         self.root = root
         self.root.title("WFH Attendance System")
-        self.root.geometry("1400x900")
-        self.root.configure(bg='#f8fafc')
+        self.root.geometry("1000x700")
+        self.root.configure(bg='#fafafa')
         
         # Set window icon (you can add an icon file if needed)
         try:
@@ -45,8 +45,8 @@ class WFHAttendanceApp:
         self.current_session_id = None
         self.user_role = None  # 'admin', 'roles', 'regular'
         
-        # Configure modern professional styles
-        self.setup_modern_styles()
+        # Configure modern styles with pastel colors
+        self.setup_pastel_styles()
         
         # Create modern UI
         self.create_modern_ui()
@@ -61,197 +61,195 @@ class WFHAttendanceApp:
     def center_window(self):
         """Center the window on the screen"""
         self.root.update_idletasks()
-        width = 1400
-        height = 900
+        width = 1000
+        height = 700
         x = (self.root.winfo_screenwidth() // 2) - (width // 2)
         y = (self.root.winfo_screenheight() // 2) - (height // 2)
         self.root.geometry(f'{width}x{height}+{x}+{y}')
 
-    def setup_modern_styles(self):
-        """Configure modern, professional styles"""
+    def setup_pastel_styles(self):
+        """Configure modern, professional styles with pastel colors"""
         style = ttk.Style()
         style.theme_use('clam')
         
-        # Professional color scheme
+        # Beautiful pastel color scheme - compact and professional
         self.colors = {
-            'primary': '#2563eb',      # Professional blue
-            'primary_light': '#3b82f6',
-            'primary_dark': '#1d4ed8',
-            'secondary': '#64748b',    # Slate gray
-            'success': '#059669',      # Emerald
-            'success_light': '#10b981',
-            'warning': '#d97706',      # Amber
-            'warning_light': '#f59e0b',
-            'danger': '#dc2626',       # Red
-            'danger_light': '#ef4444',
-            'info': '#7c3aed',         # Violet
-            'info_light': '#8b5cf6',
-            'light': '#f8fafc',        # Light background
+            'primary': '#a8d8ea',      # Soft blue
+            'primary_light': '#cae9ff',
+            'primary_dark': '#88b8d4',
+            'secondary': '#ffd6e0',    # Soft pink
+            'success': '#c1f7dc',      # Mint green
+            'success_light': '#e3fcef',
+            'success_dark': '#95d8a8',
+            'warning': '#ffeaa7',      # Soft yellow
+            'warning_light': '#fff9e6',
+            'warning_dark': '#ffd8a6',
+            'danger': '#ffb3b3',       # Soft coral
+            'danger_light': '#ffe6e6',
+            'danger_dark': '#ff9999',
+            'info': '#d4c4fb',         # Lavender
+            'info_light': '#f0ebff',
+            'info_dark': '#c1acf9',
+            'light': '#fafafa',        # Off-white background
             'card_bg': '#ffffff',      # White cards
-            'text_primary': '#1e293b', # Dark text
-            'text_secondary': '#64748b', # Light text
-            'text_light': '#94a3b8',   # Lighter text
-            'border': '#e2e8f0',       # Border color
-            'hover': '#f1f5f9'         # Hover state
+            'text_primary': '#374151', # Soft dark gray
+            'text_secondary': '#6b7280', # Medium gray
+            'text_light': '#9ca3af',   # Light gray
+            'border': '#e5e7eb',       # Very light gray
+            'hover': '#f8fafc'         # Hover state
         }
         
-        # Configure styles
+        # Configure styles - optimized for compact layout
         style.configure('Modern.TFrame', background=self.colors['light'])
         style.configure('Card.TFrame', background=self.colors['card_bg'], relief='flat', borderwidth=1)
         
-        # Title label
+        # Compact title label
         style.configure('Title.TLabel',
-                       font=('Segoe UI', 28, 'bold'),
+                       font=('Segoe UI', 20, 'bold'),
                        background=self.colors['light'],
                        foreground=self.colors['text_primary'])
         
-        # Section titles
+        # Compact section titles
         style.configure('Section.TLabel',
-                       font=('Segoe UI', 16, 'bold'),
+                       font=('Segoe UI', 12, 'bold'),
                        background=self.colors['card_bg'],
                        foreground=self.colors['text_primary'])
         
-        # Regular labels
+        # Compact regular labels
         style.configure('Modern.TLabel',
-                       font=('Segoe UI', 11),
+                       font=('Segoe UI', 9),
                        background=self.colors['card_bg'],
                        foreground=self.colors['text_primary'])
         
-        # Small labels
+        # Compact small labels
         style.configure('Small.TLabel',
-                       font=('Segoe UI', 9),
+                       font=('Segoe UI', 8),
                        background=self.colors['card_bg'],
                        foreground=self.colors['text_secondary'])
         
-        # Entry fields
+        # Compact entry fields
         style.configure('Modern.TEntry',
-                       font=('Segoe UI', 11),
+                       font=('Segoe UI', 10),
                        fieldbackground='white',
-                       borderwidth=2,
+                       borderwidth=1,
                        relief='solid',
-                       focusthickness=3,
+                       focusthickness=2,
                        focuscolor=self.colors['primary'],
-                       padding=(10, 8))
+                       padding=(8, 6))
         
-        # Buttons - Primary
+        # Compact Buttons - Primary
         style.configure('Primary.TButton',
-                       font=('Segoe UI', 11, 'bold'),
+                       font=('Segoe UI', 9, 'bold'),
                        background=self.colors['primary'],
-                       foreground='white',
+                       foreground=self.colors['text_primary'],
                        borderwidth=0,
                        focuscolor='none',
-                       padding=(20, 12))
+                       padding=(12, 8))
         style.map('Primary.TButton',
                  background=[('active', self.colors['primary_light']),
                            ('pressed', self.colors['primary_dark'])])
         
-        # Success button
+        # Compact Success button
         style.configure('Success.TButton',
-                       font=('Segoe UI', 11, 'bold'),
+                       font=('Segoe UI', 9, 'bold'),
                        background=self.colors['success'],
-                       foreground='white',
+                       foreground=self.colors['text_primary'],
                        borderwidth=0,
                        focuscolor='none',
-                       padding=(20, 12))
+                       padding=(12, 8))
         style.map('Success.TButton',
                  background=[('active', self.colors['success_light']),
-                           ('pressed', '#047857')])
+                           ('pressed', self.colors['success_dark'])])
         
-        # Warning button
+        # Compact Warning button
         style.configure('Warning.TButton',
-                       font=('Segoe UI', 11, 'bold'),
+                       font=('Segoe UI', 9, 'bold'),
                        background=self.colors['warning'],
-                       foreground='white',
+                       foreground=self.colors['text_primary'],
                        borderwidth=0,
                        focuscolor='none',
-                       padding=(20, 12))
+                       padding=(12, 8))
         style.map('Warning.TButton',
                  background=[('active', self.colors['warning_light']),
-                           ('pressed', '#b45309')])
+                           ('pressed', self.colors['warning_dark'])])
         
-        # Danger button
+        # Compact Danger button
         style.configure('Danger.TButton',
-                       font=('Segoe UI', 11, 'bold'),
+                       font=('Segoe UI', 9, 'bold'),
                        background=self.colors['danger'],
-                       foreground='white',
+                       foreground=self.colors['text_primary'],
                        borderwidth=0,
                        focuscolor='none',
-                       padding=(20, 12))
+                       padding=(12, 8))
         style.map('Danger.TButton',
                  background=[('active', self.colors['danger_light']),
-                           ('pressed', '#b91c1c')])
+                           ('pressed', self.colors['danger_dark'])])
         
-        # Info button
+        # Compact Info button
         style.configure('Info.TButton',
-                       font=('Segoe UI', 11, 'bold'),
+                       font=('Segoe UI', 9, 'bold'),
                        background=self.colors['info'],
-                       foreground='white',
+                       foreground=self.colors['text_primary'],
                        borderwidth=0,
                        focuscolor='none',
-                       padding=(20, 12))
+                       padding=(12, 8))
         style.map('Info.TButton',
                  background=[('active', self.colors['info_light']),
-                           ('pressed', '#6d28d9')])
+                           ('pressed', self.colors['info_dark'])])
         
-        # Secondary button
+        # Compact Secondary button
         style.configure('Secondary.TButton',
-                       font=('Segoe UI', 11),
-                       background=self.colors['card_bg'],
+                       font=('Segoe UI', 9),
+                       background=self.colors['secondary'],
                        foreground=self.colors['text_primary'],
-                       borderwidth=1,
-                       relief='solid',
+                       borderwidth=0,
                        focuscolor='none',
-                       padding=(16, 10))
+                       padding=(10, 6))
         style.map('Secondary.TButton',
-                 background=[('active', self.colors['hover'])])
+                 background=[('active', '#ffecf1'),
+                           ('pressed', '#ffc2d1')])
         
-        # Treeview style
+        # Compact Treeview style
         style.configure('Modern.Treeview',
-                       font=('Segoe UI', 10),
-                       rowheight=35,
+                       font=('Segoe UI', 9),
+                       rowheight=28,
                        background='white',
                        fieldbackground='white',
                        foreground=self.colors['text_primary'],
                        borderwidth=0)
         style.configure('Modern.Treeview.Heading',
-                       font=('Segoe UI', 11, 'bold'),
+                       font=('Segoe UI', 9, 'bold'),
                        background=self.colors['primary'],
-                       foreground='white',
+                       foreground=self.colors['text_primary'],
                        relief='flat')
         style.map('Modern.Treeview.Heading',
                  background=[('active', self.colors['primary_light'])])
         
-        # Notebook style
+        # Compact Notebook style
         style.configure('Modern.TNotebook',
                        background=self.colors['light'],
                        borderwidth=0)
         style.configure('Modern.TNotebook.Tab',
-                       font=('Segoe UI', 11, 'bold'),
-                       padding=(20, 12),
+                       font=('Segoe UI', 10, 'bold'),
+                       padding=(15, 8),
                        background=self.colors['card_bg'],
                        foreground=self.colors['text_secondary'],
-                       borderwidth=1)
+                       borderwidth=0)
         style.map('Modern.TNotebook.Tab',
                  background=[('selected', self.colors['primary']),
                            ('active', self.colors['primary_light'])],
-                 foreground=[('selected', 'white')])
+                 foreground=[('selected', self.colors['text_primary'])])
         
-        # Combobox style
+        # Compact Combobox style
         style.configure('Modern.TCombobox',
-                       font=('Segoe UI', 10),
+                       font=('Segoe UI', 9),
                        background='white',
                        fieldbackground='white',
-                       borderwidth=2,
+                       borderwidth=1,
                        relief='solid')
-        
-        # Checkbutton style
-        style.configure('Modern.TCheckbutton',
-                       font=('Segoe UI', 10),
-                       background=self.colors['card_bg'],
-                       foreground=self.colors['text_primary'])
 
     def create_modern_ui(self):
-        """Create modern, professional UI"""
+        """Create compact, modern UI"""
         # Main container with soft background
         self.main_container = ttk.Frame(self.root, style='Modern.TFrame')
         self.main_container.pack(fill=tk.BOTH, expand=True, padx=0, pady=0)
@@ -263,38 +261,38 @@ class WFHAttendanceApp:
         self.create_content_area()
 
     def create_header(self):
-        """Create modern header section"""
-        header_frame = tk.Frame(self.main_container, bg=self.colors['primary'], height=100)
+        """Create compact header section"""
+        header_frame = tk.Frame(self.main_container, bg=self.colors['primary'], height=70)
         header_frame.pack(fill=tk.X, padx=0, pady=0)
         header_frame.pack_propagate(False)
         
         # Header content
         header_content = ttk.Frame(header_frame, style='Modern.TFrame')
-        header_content.place(relx=0.5, rely=0.5, anchor='center', width=1360, height=80)
+        header_content.place(relx=0.5, rely=0.5, anchor='center', width=980, height=50)
         
         # Logo and title
         title_frame = ttk.Frame(header_content, style='Modern.TFrame')
-        title_frame.pack(side=tk.LEFT, padx=40)
+        title_frame.pack(side=tk.LEFT, padx=20)
         
-        # Main title with icon
+        # Compact title with icon
         title_label = ttk.Label(
             title_frame,
-            text="🏢 WFH Attendance System",
+            text="🏢 WFH Attendance",
             style='Title.TLabel'
         )
         title_label.pack(side=tk.LEFT)
         
         # Time display
         time_frame = ttk.Frame(header_content, style='Modern.TFrame')
-        time_frame.pack(side=tk.RIGHT, padx=40)
+        time_frame.pack(side=tk.RIGHT, padx=20)
         
         self.time_display_var = tk.StringVar(value="Loading...")
         time_label = ttk.Label(
             time_frame,
             textvariable=self.time_display_var,
-            font=('Segoe UI', 12, 'bold'),
+            font=('Segoe UI', 10, 'bold'),
             background=self.colors['primary'],
-            foreground='white'
+            foreground=self.colors['text_primary']
         )
         time_label.pack(side=tk.RIGHT)
         
@@ -305,7 +303,7 @@ class WFHAttendanceApp:
         """Create main content area"""
         # Create notebook for main content
         self.main_notebook = ttk.Notebook(self.main_container, style='Modern.TNotebook')
-        self.main_notebook.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        self.main_notebook.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
         
         # Dashboard tab
         self.create_dashboard_tab()
@@ -317,39 +315,31 @@ class WFHAttendanceApp:
         self.create_sessions_tab()
 
     def create_dashboard_tab(self):
-        """Create dashboard tab with login and attendance features"""
+        """Create compact dashboard tab"""
         dashboard_frame = ttk.Frame(self.main_notebook, style='Card.TFrame')
         self.main_notebook.add(dashboard_frame, text="📊 Dashboard")
         
-        # Two-column layout
+        # Single column layout for better space utilization
         main_content = ttk.Frame(dashboard_frame, style='Card.TFrame')
-        main_content.pack(fill=tk.BOTH, expand=True, padx=40, pady=30)
+        main_content.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        # Left column - Login and User Info
-        left_column = ttk.Frame(main_content, style='Card.TFrame')
-        left_column.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 20))
+        # Login Section - Top
+        self.create_login_section(main_content)
         
-        # Right column - Attendance and Export
-        right_column = ttk.Frame(main_content, style='Card.TFrame')
-        right_column.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(20, 0))
+        # Attendance Section - Middle
+        self.create_attendance_section(main_content)
         
-        # Login Section
-        self.create_login_section(left_column)
-        
-        # Attendance Section
-        self.create_attendance_section(right_column)
-        
-        # Export Section
-        self.create_export_section(right_column)
+        # Export Section - Bottom (conditionally shown)
+        self.create_export_section(main_content)
 
     def create_login_section(self, parent):
-        """Create modern login section"""
+        """Create compact login section using User Management design pattern"""
         login_card = ttk.Frame(parent, style='Card.TFrame')
-        login_card.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
+        login_card.pack(fill=tk.X, pady=(0, 15))
         
         # Card header
         header_frame = ttk.Frame(login_card, style='Card.TFrame')
-        header_frame.pack(fill=tk.X, padx=25, pady=(25, 0))
+        header_frame.pack(fill=tk.X, padx=20, pady=(15, 0))
         
         ttk.Label(
             header_frame,
@@ -357,37 +347,43 @@ class WFHAttendanceApp:
             style='Section.TLabel'
         ).pack(anchor=tk.W)
         
-        # Card content
+        # Card content - Using User Management form layout
         content_frame = ttk.Frame(login_card, style='Card.TFrame')
-        content_frame.pack(fill=tk.BOTH, expand=True, padx=25, pady=20)
+        content_frame.pack(fill=tk.X, padx=20, pady=15)
         
-        # Form fields
-        field_frame = ttk.Frame(content_frame, style='Card.TFrame')
-        field_frame.pack(fill=tk.X, pady=(0, 20))
+        # Compact form layout - Same as User Management
+        form_frame = ttk.Frame(content_frame, style='Card.TFrame')
+        form_frame.pack(fill=tk.X, pady=(0, 15))
         
-        # User ID
-        ttk.Label(field_frame, text="User ID", style='Modern.TLabel').pack(anchor=tk.W, pady=(0, 8))
+        # User ID - Using grid layout like User Management
+        ttk.Label(form_frame, text="User ID:", style='Modern.TLabel').grid(
+            row=0, column=0, padx=(0, 10), pady=8, sticky=tk.W
+        )
         self.user_id_var = tk.StringVar()
         self.user_id_entry = ttk.Entry(
-            field_frame, 
+            form_frame, 
             textvariable=self.user_id_var,
-            font=('Segoe UI', 12),
+            width=18,
+            font=('Segoe UI', 10),
             style='Modern.TEntry'
         )
-        self.user_id_entry.pack(fill=tk.X, pady=(0, 20))
+        self.user_id_entry.grid(row=0, column=1, padx=(0, 20), pady=8, sticky=tk.W)
         
-        # User Name
-        ttk.Label(field_frame, text="User Name", style='Modern.TLabel').pack(anchor=tk.W, pady=(0, 8))
+        # User Name - Using grid layout like User Management
+        ttk.Label(form_frame, text="User Name:", style='Modern.TLabel').grid(
+            row=0, column=2, padx=(0, 10), pady=8, sticky=tk.W
+        )
         self.user_name_var = tk.StringVar()
         self.user_name_entry = ttk.Entry(
-            field_frame, 
+            form_frame, 
             textvariable=self.user_name_var,
-            font=('Segoe UI', 12),
+            width=25,
+            font=('Segoe UI', 10),
             style='Modern.TEntry'
         )
-        self.user_name_entry.pack(fill=tk.X, pady=(0, 25))
+        self.user_name_entry.grid(row=0, column=3, padx=(0, 20), pady=8, sticky=tk.W)
         
-        # Buttons frame
+        # Action buttons frame - Same layout as User Management
         btn_frame = ttk.Frame(content_frame, style='Card.TFrame')
         btn_frame.pack(fill=tk.X)
         
@@ -415,14 +411,14 @@ class WFHAttendanceApp:
             btn_frame,
             text="👥 Manage Users",
             command=self.manage_users,
-            style='Secondary.TButton',
+            style='Info.TButton',
             state=tk.DISABLED
         )
         self.manage_users_btn.pack(side=tk.LEFT)
         
         # Status Label
         status_frame = ttk.Frame(content_frame, style='Card.TFrame')
-        status_frame.pack(fill=tk.X, pady=(20, 0))
+        status_frame.pack(fill=tk.X, pady=(10, 0))
         
         self.login_status_var = tk.StringVar(value="Please login to continue")
         self.login_status_label = ttk.Label(
@@ -433,13 +429,13 @@ class WFHAttendanceApp:
         self.login_status_label.pack(anchor=tk.W)
 
     def create_attendance_section(self, parent):
-        """Create modern attendance section"""
+        """Create compact attendance section"""
         attendance_card = ttk.Frame(parent, style='Card.TFrame')
-        attendance_card.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
+        attendance_card.pack(fill=tk.X, pady=(0, 15))
         
         # Card header
         header_frame = ttk.Frame(attendance_card, style='Card.TFrame')
-        header_frame.pack(fill=tk.X, padx=25, pady=(25, 0))
+        header_frame.pack(fill=tk.X, padx=20, pady=(15, 0))
         
         ttk.Label(
             header_frame,
@@ -449,23 +445,23 @@ class WFHAttendanceApp:
         
         # Card content
         content_frame = ttk.Frame(attendance_card, style='Card.TFrame')
-        content_frame.pack(fill=tk.BOTH, expand=True, padx=25, pady=20)
+        content_frame.pack(fill=tk.X, padx=20, pady=15)
         
         # Status display
         status_frame = ttk.Frame(content_frame, style='Card.TFrame')
-        status_frame.pack(fill=tk.X, pady=(0, 25))
+        status_frame.pack(fill=tk.X, pady=(0, 12))
         
         self.attendance_status_var = tk.StringVar(value="No active session")
         status_label = ttk.Label(
             status_frame,
             textvariable=self.attendance_status_var,
-            font=('Segoe UI', 13, 'bold'),
+            font=('Segoe UI', 10, 'bold'),
             background=self.colors['card_bg'],
             foreground=self.colors['text_secondary']
         )
         status_label.pack(anchor=tk.W)
         
-        # Buttons frame
+        # Compact buttons frame
         btn_frame = ttk.Frame(content_frame, style='Card.TFrame')
         btn_frame.pack(fill=tk.X)
         
@@ -477,7 +473,7 @@ class WFHAttendanceApp:
             style='Success.TButton',
             state=tk.DISABLED
         )
-        self.time_in_btn.pack(side=tk.LEFT, padx=(0, 10))
+        self.time_in_btn.pack(side=tk.LEFT, padx=(0, 8))
         
         # Time Out Button
         self.time_out_btn = ttk.Button(
@@ -487,12 +483,12 @@ class WFHAttendanceApp:
             style='Danger.TButton',
             state=tk.DISABLED
         )
-        self.time_out_btn.pack(side=tk.LEFT, padx=(0, 10))
+        self.time_out_btn.pack(side=tk.LEFT, padx=(0, 8))
         
         # Auto Time In Button (Roles User only)
         self.auto_time_in_btn = ttk.Button(
             btn_frame,
-            text="🔄 Auto New Session",
+            text="🔄 Auto Session",
             command=self.auto_new_session,
             style='Warning.TButton',
             state=tk.DISABLED
@@ -500,12 +496,12 @@ class WFHAttendanceApp:
         self.auto_time_in_btn.pack(side=tk.LEFT)
 
     def create_export_section(self, parent):
-        """Create modern export section"""
+        """Create compact export section"""
         self.export_card = ttk.Frame(parent, style='Card.TFrame')
         
         # Card header
         header_frame = ttk.Frame(self.export_card, style='Card.TFrame')
-        header_frame.pack(fill=tk.X, padx=25, pady=(25, 0))
+        header_frame.pack(fill=tk.X, padx=20, pady=(15, 0))
         
         ttk.Label(
             header_frame,
@@ -515,7 +511,7 @@ class WFHAttendanceApp:
         
         # Card content
         content_frame = ttk.Frame(self.export_card, style='Card.TFrame')
-        content_frame.pack(fill=tk.BOTH, expand=True, padx=25, pady=20)
+        content_frame.pack(fill=tk.X, padx=20, pady=15)
         
         # Export Button (Admin and Roles only)
         self.export_btn = ttk.Button(
@@ -528,7 +524,7 @@ class WFHAttendanceApp:
         
         # Export Path Label
         path_frame = ttk.Frame(content_frame, style='Card.TFrame')
-        path_frame.pack(fill=tk.X, pady=(15, 0))
+        path_frame.pack(fill=tk.X, pady=(8, 0))
         
         self.export_path_var = tk.StringVar(value="Export path will appear here")
         self.export_path_label = ttk.Label(
@@ -539,25 +535,25 @@ class WFHAttendanceApp:
         self.export_path_label.pack(anchor=tk.W)
 
     def create_records_tab(self):
-        """Create modern records tab"""
+        """Create compact records tab"""
         records_frame = ttk.Frame(self.main_notebook, style='Card.TFrame')
-        self.main_notebook.add(records_frame, text="📋 Attendance Records")
+        self.main_notebook.add(records_frame, text="📋 Records")
         
-        # Content with padding
+        # Content with compact padding
         content_frame = ttk.Frame(records_frame, style='Card.TFrame')
-        content_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
         
         # Header
         header_frame = ttk.Frame(content_frame, style='Card.TFrame')
-        header_frame.pack(fill=tk.X, pady=(0, 20))
+        header_frame.pack(fill=tk.X, pady=(0, 12))
         
         ttk.Label(
             header_frame,
-            text="My Attendance History",
+            text="Attendance History",
             style='Section.TLabel'
         ).pack(anchor=tk.W)
         
-        # Create treeview with scrollbar
+        # Create compact treeview with scrollbar
         tree_frame = ttk.Frame(content_frame, style='Card.TFrame')
         tree_frame.pack(fill=tk.BOTH, expand=True)
         
@@ -565,24 +561,25 @@ class WFHAttendanceApp:
         scrollbar = ttk.Scrollbar(tree_frame)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        # Treeview
+        # Compact treeview
         columns = ('user_id', 'user_name', 'date', 'time_in', 'time_out', 'duration')
         self.records_tree = ttk.Treeview(
             tree_frame,
             columns=columns,
             show='headings',
             style='Modern.Treeview',
-            yscrollcommand=scrollbar.set
+            yscrollcommand=scrollbar.set,
+            height=12
         )
         
-        # Configure columns
+        # Configure compact columns
         column_configs = [
-            ('user_id', 'User ID', 120),
-            ('user_name', 'User Name', 180),
-            ('date', 'Date', 140),
-            ('time_in', 'Time In', 120),
-            ('time_out', 'Time Out', 120),
-            ('duration', 'Duration', 120)
+            ('user_id', 'User ID', 90),
+            ('user_name', 'Name', 120),
+            ('date', 'Date', 100),
+            ('time_in', 'Time In', 80),
+            ('time_out', 'Time Out', 80),
+            ('duration', 'Duration', 80)
         ]
         
         for col, heading, width in column_configs:
@@ -597,25 +594,25 @@ class WFHAttendanceApp:
         self.records_tree.tag_configure('oddrow', background='white')
 
     def create_sessions_tab(self):
-        """Create modern sessions tab"""
+        """Create compact sessions tab"""
         sessions_frame = ttk.Frame(self.main_notebook, style='Card.TFrame')
-        self.main_notebook.add(sessions_frame, text="🔍 Active Sessions")
+        self.main_notebook.add(sessions_frame, text="🔍 Sessions")
         
-        # Content with padding
+        # Content with compact padding
         content_frame = ttk.Frame(sessions_frame, style='Card.TFrame')
-        content_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
         
         # Header
         header_frame = ttk.Frame(content_frame, style='Card.TFrame')
-        header_frame.pack(fill=tk.X, pady=(0, 20))
+        header_frame.pack(fill=tk.X, pady=(0, 12))
         
         ttk.Label(
             header_frame,
-            text="Current Active Sessions",
+            text="Active Sessions",
             style='Section.TLabel'
         ).pack(anchor=tk.W)
         
-        # Create treeview with scrollbar
+        # Create compact treeview with scrollbar
         tree_frame = ttk.Frame(content_frame, style='Card.TFrame')
         tree_frame.pack(fill=tk.BOTH, expand=True)
         
@@ -623,23 +620,24 @@ class WFHAttendanceApp:
         scrollbar = ttk.Scrollbar(tree_frame)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        # Treeview
+        # Compact treeview
         columns = ('session_id', 'user_id', 'user_name', 'date', 'time_in')
         self.sessions_tree = ttk.Treeview(
             tree_frame,
             columns=columns,
             show='headings',
             style='Modern.Treeview',
-            yscrollcommand=scrollbar.set
+            yscrollcommand=scrollbar.set,
+            height=12
         )
         
-        # Configure columns
+        # Configure compact columns
         column_configs = [
-            ('session_id', 'Session ID', 200),
-            ('user_id', 'User ID', 120),
-            ('user_name', 'User Name', 180),
-            ('date', 'Date', 140),
-            ('time_in', 'Time In', 120)
+            ('session_id', 'Session ID', 150),
+            ('user_id', 'User ID', 90),
+            ('user_name', 'Name', 120),
+            ('date', 'Date', 100),
+            ('time_in', 'Time In', 80)
         ]
         
         for col, heading, width in column_configs:
@@ -656,7 +654,7 @@ class WFHAttendanceApp:
         # Force time out button (Admin only)
         self.force_out_btn = ttk.Button(
             content_frame,
-            text="🛑 Force Time Out Selected Session",
+            text="🛑 Force Time Out",
             command=self.force_time_out,
             style='Danger.TButton'
         )
@@ -670,31 +668,25 @@ class WFHAttendanceApp:
     def toggle_features_based_on_role(self):
         """Show/hide features based on user role"""
         if self.user_role == 'admin':
-            # Admin: Show user management, export, hide attendance
-            self.export_card.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
+            self.export_card.pack(fill=tk.X, pady=(0, 10))
             self.manage_users_btn.config(state=tk.NORMAL)
-            self.force_out_btn.pack(pady=(20, 0))
+            self.force_out_btn.pack(pady=(12, 0))
             self.auto_time_in_btn.pack_forget()
         elif self.user_role == 'roles':
-            # Roles User: Show export and attendance, hide user management
-            self.export_card.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
+            self.export_card.pack(fill=tk.X, pady=(0, 10))
             self.manage_users_btn.config(state=tk.DISABLED)
             self.force_out_btn.pack_forget()
-            self.auto_time_in_btn.pack(side=tk.LEFT, padx=(10, 0))
+            self.auto_time_in_btn.pack(side=tk.LEFT, padx=(8, 0))
         elif self.user_role == 'regular':
-            # Regular User: Show only attendance, hide everything else
             self.export_card.pack_forget()
             self.manage_users_btn.config(state=tk.DISABLED)
             self.force_out_btn.pack_forget()
             self.auto_time_in_btn.pack_forget()
         else:
-            # Not logged in: Hide everything
             self.export_card.pack_forget()
             self.manage_users_btn.config(state=tk.DISABLED)
             self.force_out_btn.pack_forget()
             self.auto_time_in_btn.pack_forget()
-
-    # ========== ALL YOUR ORIGINAL FUNCTIONAL METHODS - UNCHANGED ==========
 
     def get_user_role(self, user_id: str) -> str:
         """Get user role: admin, roles, or regular"""
@@ -731,7 +723,6 @@ class WFHAttendanceApp:
         self.registered_users.append(new_user)
         self.save_registered_users()
         
-        # Add to specific role list
         if role == 'admin':
             admin_user = {
                 'user_id': user_id,
@@ -758,7 +749,6 @@ class WFHAttendanceApp:
             messagebox.showerror("Error", "Please enter both User ID and User Name")
             return
         
-        # Check if user exists and credentials match
         user_exists = False
         correct_credentials = False
         user_data = None
@@ -773,8 +763,7 @@ class WFHAttendanceApp:
                 else:
                     messagebox.showerror(
                         "Login Error", 
-                        f"User ID '{user_id}' is registered to '{user['user_name']}'. "
-                        f"Please use the correct User Name."
+                        f"User ID '{user_id}' is registered to '{user['user_name']}'. Please use the correct User Name."
                     )
                     return
         
@@ -783,33 +772,27 @@ class WFHAttendanceApp:
             return
         
         if correct_credentials and user_data:
-            # Determine user role
             self.user_role = self.get_user_role(user_id)
             role_msg = "Admin" if self.user_role == 'admin' else "Roles User" if self.user_role == 'roles' else "Regular User"
             
             self.current_user_id = user_id
             
-            # Update status with role indicator
             role_icon = "👑" if self.user_role == 'admin' else "⚡" if self.user_role == 'roles' else "👤"
             self.login_status_var.set(f"{role_icon} Logged in as: {user_name} ({user_id}) - {role_msg}")
-            self.login_status_label.configure(foreground=self.colors['success'])
+            self.login_status_label.configure(foreground=self.colors['success_dark'])
             
-            # Enable/disable buttons based on role
             self.login_btn.config(state=tk.DISABLED)
             self.logout_btn.config(state=tk.NORMAL)
             self.user_id_entry.config(state=tk.DISABLED)
             self.user_name_entry.config(state=tk.DISABLED)
             
-            # Toggle features based on role
             self.toggle_features_based_on_role()
             
-            # For regular and roles users, enable time in/out and check session
             if self.user_role in ['regular', 'roles']:
                 self.time_in_btn.config(state=tk.NORMAL)
                 self.auto_time_in_btn.config(state=tk.NORMAL)
                 self.check_active_session()
             
-            # Update records display to show only current user's records for non-admin users
             if self.user_role != 'admin':
                 self.update_records_display()
             
@@ -821,39 +804,33 @@ class WFHAttendanceApp:
             messagebox.showerror("Access Denied", "Only administrators can manage users.")
             return
             
-        # Create modern user management window
         users_window = tk.Toplevel(self.root)
         users_window.title("User Management - Admin")
-        users_window.geometry("1000x700")
+        users_window.geometry("800x550")
         users_window.configure(bg=self.colors['light'])
         
-        # Center the window
         users_window.update_idletasks()
-        width = 1000
-        height = 700
+        width = 800
+        height = 550
         x = (users_window.winfo_screenwidth() // 2) - (width // 2)
         y = (users_window.winfo_screenheight() // 2) - (height // 2)
         users_window.geometry(f'{width}x{height}+{x}+{y}')
         
-        # Main container
         main_container = ttk.Frame(users_window, style='Modern.TFrame')
-        main_container.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
+        main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        # Title
         title_label = ttk.Label(
             main_container,
-            text="👥 User Management - Admin Panel",
+            text="👥 User Management",
             style='Title.TLabel'
         )
-        title_label.pack(pady=(0, 25))
+        title_label.pack(pady=(0, 15))
         
-        # Registration Card
         reg_card = ttk.Frame(main_container, style='Card.TFrame')
-        reg_card.pack(fill=tk.X, pady=(0, 25))
+        reg_card.pack(fill=tk.X, pady=(0, 15))
         
-        # Card header
         reg_header = ttk.Frame(reg_card, style='Card.TFrame')
-        reg_header.pack(fill=tk.X, padx=25, pady=(20, 0))
+        reg_header.pack(fill=tk.X, padx=20, pady=(15, 0))
         
         ttk.Label(
             reg_header,
@@ -861,28 +838,24 @@ class WFHAttendanceApp:
             style='Section.TLabel'
         ).pack(anchor=tk.W)
         
-        # Registration form
         form_frame = ttk.Frame(reg_card, style='Card.TFrame')
-        form_frame.pack(fill=tk.X, padx=25, pady=20)
+        form_frame.pack(fill=tk.X, padx=20, pady=15)
         
-        # User ID
-        ttk.Label(form_frame, text="User ID:", style='Modern.TLabel').grid(row=0, column=0, padx=(0, 15), pady=8, sticky=tk.W)
+        ttk.Label(form_frame, text="User ID:", style='Modern.TLabel').grid(row=0, column=0, padx=(0, 8), pady=5, sticky=tk.W)
         new_user_id_var = tk.StringVar()
-        new_user_id_entry = ttk.Entry(form_frame, textvariable=new_user_id_var, width=18, font=('Segoe UI', 11), style='Modern.TEntry')
-        new_user_id_entry.grid(row=0, column=1, padx=(0, 30), pady=8)
+        new_user_id_entry = ttk.Entry(form_frame, textvariable=new_user_id_var, width=12, font=('Segoe UI', 9), style='Modern.TEntry')
+        new_user_id_entry.grid(row=0, column=1, padx=(0, 15), pady=5)
         
-        # User Name
-        ttk.Label(form_frame, text="User Name:", style='Modern.TLabel').grid(row=0, column=2, padx=(0, 15), pady=8, sticky=tk.W)
+        ttk.Label(form_frame, text="User Name:", style='Modern.TLabel').grid(row=0, column=2, padx=(0, 8), pady=5, sticky=tk.W)
         new_user_name_var = tk.StringVar()
-        new_user_name_entry = ttk.Entry(form_frame, textvariable=new_user_name_var, width=25, font=('Segoe UI', 11), style='Modern.TEntry')
-        new_user_name_entry.grid(row=0, column=3, padx=(0, 30), pady=8)
+        new_user_name_entry = ttk.Entry(form_frame, textvariable=new_user_name_var, width=15, font=('Segoe UI', 9), style='Modern.TEntry')
+        new_user_name_entry.grid(row=0, column=3, padx=(0, 15), pady=5)
         
-        # Role Selection
-        ttk.Label(form_frame, text="Role:", style='Modern.TLabel').grid(row=0, column=4, padx=(0, 15), pady=8, sticky=tk.W)
+        ttk.Label(form_frame, text="Role:", style='Modern.TLabel').grid(row=0, column=4, padx=(0, 8), pady=5, sticky=tk.W)
         role_var = tk.StringVar(value="regular")
         role_combo = ttk.Combobox(form_frame, textvariable=role_var, values=["regular", "roles", "admin"], 
-                                 state="readonly", width=12, style='Modern.TCombobox')
-        role_combo.grid(row=0, column=5, padx=(0, 20), pady=8)
+                                 state="readonly", width=8, style='Modern.TCombobox')
+        role_combo.grid(row=0, column=5, padx=(0, 15), pady=5)
         
         def register_new_user_admin():
             user_id = new_user_id_var.get().strip()
@@ -893,13 +866,11 @@ class WFHAttendanceApp:
                 messagebox.showerror("Error", "Please enter both User ID and User Name")
                 return
             
-            # Check for duplicates
             is_duplicate, error_message = self.check_duplicate_user(user_id, user_name)
             if is_duplicate:
                 messagebox.showerror("Duplicate User", error_message)
                 return
             
-            # Show confirmation modal when registering admin
             if role == 'admin':
                 confirm = messagebox.askyesno(
                     "Register Admin User",
@@ -911,37 +882,28 @@ class WFHAttendanceApp:
                     f"This action cannot be undone."
                 )
                 if not confirm:
-                    # Reset to regular user if not confirmed
                     role_var.set("regular")
                     return
             
-            # Register new user
             self.register_new_user(user_id, user_name, role)
             
-            # Show appropriate success message
             if role == 'admin':
                 messagebox.showinfo("Success", f"Administrator '{user_name}' ({user_id}) registered successfully!")
             else:
                 messagebox.showinfo("Success", f"User '{user_name}' ({user_id}) registered as {role} successfully!")
             
-            # Clear fields but keep the selected role
             new_user_id_var.set("")
             new_user_name_var.set("")
-            # Don't reset the role selection
-            
-            # Refresh user list
             refresh_user_list()
         
-        register_btn = ttk.Button(form_frame, text="Register User", command=register_new_user_admin, style='Success.TButton')
-        register_btn.grid(row=0, column=6, padx=(0, 10), pady=8)
+        register_btn = ttk.Button(form_frame, text="Register", command=register_new_user_admin, style='Success.TButton')
+        register_btn.grid(row=0, column=6, padx=(0, 10), pady=5)
         
-        # Users List Card
         list_card = ttk.Frame(main_container, style='Card.TFrame')
-        list_card.pack(fill=tk.BOTH, expand=True, pady=(0, 25))
+        list_card.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
         
-        # Card header
         list_header = ttk.Frame(list_card, style='Card.TFrame')
-        list_header.pack(fill=tk.X, padx=25, pady=(20, 0))
+        list_header.pack(fill=tk.X, padx=20, pady=(15, 0))
         
         ttk.Label(
             list_header,
@@ -949,29 +911,27 @@ class WFHAttendanceApp:
             style='Section.TLabel'
         ).pack(anchor=tk.W)
         
-        # Create treeview with scrollbar
         tree_frame = ttk.Frame(list_card, style='Card.TFrame')
-        tree_frame.pack(fill=tk.BOTH, expand=True, padx=25, pady=20)
+        tree_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=15)
         
         scrollbar = ttk.Scrollbar(tree_frame)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        # Treeview
         columns = ('user_id', 'user_name', 'role', 'registered_date')
         users_tree = ttk.Treeview(
             tree_frame,
             columns=columns,
             show='headings',
             style='Modern.Treeview',
-            yscrollcommand=scrollbar.set
+            yscrollcommand=scrollbar.set,
+            height=8
         )
         
-        # Configure columns
         column_configs = [
-            ('user_id', 'User ID', 120),
-            ('user_name', 'User Name', 180),
-            ('role', 'Role', 100),
-            ('registered_date', 'Registration Date', 180)
+            ('user_id', 'User ID', 100),
+            ('user_name', 'Name', 120),
+            ('role', 'Role', 80),
+            ('registered_date', 'Registered', 120)
         ]
         
         for col, heading, width in column_configs:
@@ -981,16 +941,10 @@ class WFHAttendanceApp:
         users_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.config(command=users_tree.yview)
         
-        # Add alternating row colors
-        users_tree.tag_configure('evenrow', background=self.colors['light'])
-        users_tree.tag_configure('oddrow', background='white')
-        
         def refresh_user_list():
-            # Clear existing items
             for item in users_tree.get_children():
                 users_tree.delete(item)
             
-            # Add users to treeview with alternating colors
             for i, user in enumerate(self.registered_users):
                 tag = 'evenrow' if i % 2 == 0 else 'oddrow'
                 users_tree.insert('', tk.END, values=(
@@ -1011,12 +965,10 @@ class WFHAttendanceApp:
             user_name = users_tree.item(item, 'values')[1]
             user_role = users_tree.item(item, 'values')[2]
             
-            # Prevent self-deletion
             if user_id == self.current_user_id:
                 messagebox.showerror("Error", "You cannot delete your own account")
                 return
             
-            # Extra confirmation for deleting admin users
             if user_role == 'admin':
                 confirm = messagebox.askyesno(
                     "Confirm Admin Deletion",
@@ -1032,40 +984,42 @@ class WFHAttendanceApp:
                 )
                 
             if confirm:
-                # Remove from registered users
                 self.registered_users = [u for u in self.registered_users if u['user_id'] != user_id]
                 self.save_registered_users()
                 
-                # Remove from role-specific lists
                 self.admin_users = [a for a in self.admin_users if a['user_id'] != user_id]
                 self.save_admin_users()
                 
                 self.roles_users = [r for r in self.roles_users if r['user_id'] != user_id]
                 self.save_roles_users()
                 
-                # Refresh list
                 refresh_user_list()
                 messagebox.showinfo("Success", f"User '{user_name}' deleted successfully")
         
-        # Buttons frame
         btn_frame = ttk.Frame(list_card, style='Card.TFrame')
-        btn_frame.pack(fill=tk.X, padx=25, pady=(0, 20))
+        btn_frame.pack(fill=tk.X, padx=20, pady=(0, 15))
         
-        delete_btn = ttk.Button(btn_frame, text="🗑️ Delete Selected User", command=delete_selected_user, style='Danger.TButton')
-        delete_btn.pack(side=tk.LEFT, padx=(0, 15))
+        delete_btn = ttk.Button(btn_frame, text="🗑️ Delete User", command=delete_selected_user, style='Danger.TButton')
+        delete_btn.pack(side=tk.LEFT, padx=(0, 10))
         
-        refresh_btn = ttk.Button(btn_frame, text="🔄 Refresh List", command=refresh_user_list, style='Primary.TButton')
+        refresh_btn = ttk.Button(btn_frame, text="🔄 Refresh", command=refresh_user_list, style='Primary.TButton')
         refresh_btn.pack(side=tk.LEFT)
         
         close_btn = ttk.Button(main_container, text="Close", command=users_window.destroy, style='Secondary.TButton')
         close_btn.pack(pady=10)
         
-        # Initial load
         refresh_user_list()
+
+    # ... (All other methods remain exactly the same as in your original code)
+    # handle_logout, check_active_session, time_in, create_new_session, auto_new_session,
+    # time_out, show_validation_error, force_time_out, calculate_duration, export_to_excel,
+    # save_export_history, load_export_history, load_registered_users, save_registered_users,
+    # load_admin_users, save_admin_users, load_roles_users, save_roles_users, load_archive,
+    # save_archive, open_file, update_records_display, update_sessions_display, load_data,
+    # load_sessions, save_data, save_sessions
 
     def handle_logout(self):
         """Handle user logout"""
-        # Confirm logout if user has active session
         if self.current_session_id:
             confirm = messagebox.askyesno(
                 "Logout with Active Session",
@@ -1079,12 +1033,10 @@ class WFHAttendanceApp:
         self.current_session_id = None
         self.user_role = None
         
-        # Update status
         self.login_status_var.set("Please login to continue")
         self.login_status_label.configure(foreground=self.colors['text_secondary'])
         self.attendance_status_var.set("No active session")
         
-        # Enable/disable buttons
         self.login_btn.config(state=tk.NORMAL)
         self.logout_btn.config(state=tk.DISABLED)
         self.time_in_btn.config(state=tk.DISABLED)
@@ -1093,10 +1045,8 @@ class WFHAttendanceApp:
         self.user_id_entry.config(state=tk.NORMAL)
         self.user_name_entry.config(state=tk.NORMAL)
         
-        # Hide all features
         self.toggle_features_based_on_role()
         
-        # Clear input fields
         self.user_id_var.set("")
         self.user_name_var.set("")
         
@@ -1129,7 +1079,6 @@ class WFHAttendanceApp:
             messagebox.showerror("Error", "Please login first")
             return
         
-        # Check if user already has active session
         user_sessions = [s for s in self.active_sessions if s['user_id'] == self.current_user_id]
         if user_sessions:
             messagebox.showerror("Error", "You already have an active session!")
@@ -1142,10 +1091,8 @@ class WFHAttendanceApp:
         current_time = datetime.now().strftime("%H:%M:%S")
         today = datetime.now().strftime("%Y-%m-%d")
         
-        # Generate session ID
         session_id = self.generate_session_id(self.current_user_id)
         
-        # Create session record
         session_record = {
             'session_id': session_id,
             'user_id': self.current_user_id,
@@ -1154,15 +1101,12 @@ class WFHAttendanceApp:
             'time_in': current_time
         }
         
-        # Add to active sessions
         self.active_sessions.append(session_record)
         self.current_session_id = session_id
         
-        # Save sessions
         self.save_sessions()
         
         self.attendance_status_var.set(f"🟢 Time In recorded at {current_time}")
-        # Update button states
         self.time_in_btn.config(state=tk.DISABLED)
         self.time_out_btn.config(state=tk.NORMAL)
         self.auto_time_in_btn.config(state=tk.DISABLED)
@@ -1180,13 +1124,11 @@ class WFHAttendanceApp:
             messagebox.showerror("Error", "Please login first")
             return
         
-        # Check if user already has active session
         user_sessions = [s for s in self.active_sessions if s['user_id'] == self.current_user_id]
         if user_sessions:
             messagebox.showerror("Error", "You already have an active session!")
             return
         
-        # Confirm with user
         confirm = messagebox.askyesno(
             "Auto New Session", 
             "This will create a new Time In session without Time Out.\n\n"
@@ -1202,7 +1144,6 @@ class WFHAttendanceApp:
             messagebox.showerror("Error", "No active session found")
             return
         
-        # Find the session
         session_index = None
         session_data = None
         for i, session in enumerate(self.active_sessions):
@@ -1215,21 +1156,18 @@ class WFHAttendanceApp:
             messagebox.showerror("Error", "Session not found")
             return
         
-        # Validate user credentials against the session
         current_user_id = self.user_id_var.get().strip()
         current_user_name = self.user_name_var.get().strip()
         
         session_user_id = session_data['user_id']
         session_user_name = session_data['user_name']
         
-        # Check if credentials match the session
         if current_user_id != session_user_id or current_user_name != session_user_name:
             self.show_validation_error(session_user_id, session_user_name)
             return
         
         current_time = datetime.now().strftime("%H:%M:%S")
         
-        # Create attendance record
         record = {
             'user_id': session_data['user_id'],
             'user_name': session_data['user_name'],
@@ -1239,19 +1177,15 @@ class WFHAttendanceApp:
             'duration': self.calculate_duration(session_data['time_in'], current_time)
         }
         
-        # Add to attendance data
         self.attendance_data.append(record)
         
-        # Remove from active sessions
         self.active_sessions.pop(session_index)
         self.current_session_id = None
         
-        # Save data
         self.save_data()
         self.save_sessions()
         
         self.attendance_status_var.set(f"🔴 Time Out recorded at {current_time}")
-        # Update button states
         self.time_in_btn.config(state=tk.NORMAL)
         self.time_out_btn.config(state=tk.DISABLED)
         self.auto_time_in_btn.config(state=tk.NORMAL)
@@ -1286,7 +1220,6 @@ class WFHAttendanceApp:
         item = selected[0]
         session_id = self.sessions_tree.item(item, 'values')[0]
         
-        # Find the session
         session_index = None
         session_data = None
         for i, session in enumerate(self.active_sessions):
@@ -1301,7 +1234,6 @@ class WFHAttendanceApp:
         
         current_time = datetime.now().strftime("%H:%M:%S")
         
-        # Create attendance record
         record = {
             'user_id': session_data['user_id'],
             'user_name': session_data['user_name'],
@@ -1311,13 +1243,10 @@ class WFHAttendanceApp:
             'duration': self.calculate_duration(session_data['time_in'], current_time)
         }
         
-        # Add to attendance data
         self.attendance_data.append(record)
         
-        # Remove from active sessions
         self.active_sessions.pop(session_index)
         
-        # Save data
         self.save_data()
         self.save_sessions()
         
@@ -1346,26 +1275,20 @@ class WFHAttendanceApp:
             return
         
         try:
-            # Filter data based on user role
             if self.user_role == 'admin':
-                # Admin sees all data
                 export_data = self.attendance_data
             else:
-                # Roles User sees only their own data
                 export_data = [record for record in self.attendance_data if record['user_id'] == self.current_user_id]
             
             if not export_data:
                 messagebox.showwarning("Warning", "No attendance data to export")
                 return
             
-            # Create DataFrame
             df = pd.DataFrame(export_data)
             
-            # Generate filename with timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"wfh_attendance_{timestamp}.xlsx"
             
-            # Save to Downloads folder
             if sys.platform == "win32":
                 downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
             elif sys.platform == "darwin":
@@ -1375,21 +1298,15 @@ class WFHAttendanceApp:
             
             filepath = os.path.join(downloads_path, filename)
             
-            # Export to Excel
             df.to_excel(filepath, index=False, engine='openpyxl')
             
-            # Update export path label
             self.export_path_var.set(f"📁 Exported to: {filepath}")
             
-            # Save export history
             self.save_export_history(filepath, len(export_data))
             
-            # For Roles Users only - create a COPY for export, don't modify main data
             if self.user_role == 'roles':
-                # Create a temporary copy of the user's data for display purposes only
                 user_export_data = [record for record in self.attendance_data if record['user_id'] == self.current_user_id]
                 
-                # Show success message with record count
                 messagebox.showinfo(
                     "Success", 
                     f"Data exported successfully!\n\n"
@@ -1397,21 +1314,17 @@ class WFHAttendanceApp:
                     f"Your data has been exported. The main attendance records remain unchanged."
                 )
                 
-                # Automatically create new session for Roles User without clearing data
                 if self.current_user_id and not self.current_session_id:
                     self.create_new_session()
             else:
-                # Admin: Just show success message without clearing data
                 messagebox.showinfo(
                     "Success", 
                     f"Data exported successfully!\n\n"
                     f"Exported {len(export_data)} records to:\n{filepath}"
                 )
             
-            # Update records display
             self.update_records_display()
             
-            # Ask if user wants to open the file
             if messagebox.askyesno("Open File", "Do you want to open the Excel file?"):
                 self.open_file(filepath)
                 
@@ -1523,28 +1436,23 @@ class WFHAttendanceApp:
         try:
             if sys.platform == "win32":
                 os.startfile(filepath)
-            elif sys.platform == "darwin":  # macOS
+            elif sys.platform == "darwin":
                 subprocess.run(["open", filepath])
-            else:  # linux
+            else:
                 subprocess.run(["xdg-open", filepath])
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open file: {str(e)}")
 
     def update_records_display(self):
         """Update the records treeview based on user role"""
-        # Clear existing records
         for item in self.records_tree.get_children():
             self.records_tree.delete(item)
         
-        # Filter records based on user role
         if self.user_role == 'admin':
-            # Admin sees all records
             display_data = self.attendance_data
         else:
-            # Regular and Roles users see only their own records
             display_data = [record for record in self.attendance_data if record['user_id'] == self.current_user_id]
         
-        # Add records (show latest first) with alternating colors
         for i, record in enumerate(reversed(display_data)):
             tag = 'evenrow' if i % 2 == 0 else 'oddrow'
             self.records_tree.insert(
@@ -1562,11 +1470,9 @@ class WFHAttendanceApp:
 
     def update_sessions_display(self):
         """Update the active sessions treeview"""
-        # Clear existing sessions
         for item in self.sessions_tree.get_children():
             self.sessions_tree.delete(item)
         
-        # Add active sessions with alternating colors
         for i, session in enumerate(self.active_sessions):
             tag = 'evenrow' if i % 2 == 0 else 'oddrow'
             self.sessions_tree.insert(
