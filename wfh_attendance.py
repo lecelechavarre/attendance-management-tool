@@ -871,6 +871,7 @@ class WFHAttendanceApp:
                 messagebox.showerror("Duplicate User", error_message)
                 return
             
+            # CONDITION 1: Fix for admin role selection - show modal but keep dropdown as "regular"
             if role == 'admin':
                 confirm = messagebox.askyesno(
                     "Register Admin User",
@@ -882,18 +883,24 @@ class WFHAttendanceApp:
                     f"This action cannot be undone."
                 )
                 if not confirm:
+                    # Reset the dropdown to "regular" but still register as admin if confirmed
                     role_var.set("regular")
                     return
+                # Even though dropdown shows "regular", we register as admin
+                actual_role = 'admin'
+            else:
+                actual_role = role
             
-            self.register_new_user(user_id, user_name, role)
+            self.register_new_user(user_id, user_name, actual_role)
             
-            if role == 'admin':
+            if actual_role == 'admin':
                 messagebox.showinfo("Success", f"Administrator '{user_name}' ({user_id}) registered successfully!")
             else:
-                messagebox.showinfo("Success", f"User '{user_name}' ({user_id}) registered as {role} successfully!")
+                messagebox.showinfo("Success", f"User '{user_name}' ({user_id}) registered as {actual_role} successfully!")
             
             new_user_id_var.set("")
             new_user_name_var.set("")
+            role_var.set("regular")  # Reset to regular after registration
             refresh_user_list()
         
         register_btn = ttk.Button(form_frame, text="Register", command=register_new_user_admin, style='Success.TButton')
@@ -1009,14 +1016,6 @@ class WFHAttendanceApp:
         close_btn.pack(pady=10)
         
         refresh_user_list()
-
-    # ... (All other methods remain exactly the same as in your original code)
-    # handle_logout, check_active_session, time_in, create_new_session, auto_new_session,
-    # time_out, show_validation_error, force_time_out, calculate_duration, export_to_excel,
-    # save_export_history, load_export_history, load_registered_users, save_registered_users,
-    # load_admin_users, save_admin_users, load_roles_users, save_roles_users, load_archive,
-    # save_archive, open_file, update_records_display, update_sessions_display, load_data,
-    # load_sessions, save_data, save_sessions
 
     def handle_logout(self):
         """Handle user logout"""
@@ -1275,10 +1274,12 @@ class WFHAttendanceApp:
             return
         
         try:
+            # CONDITION 3: Admin and Roles users see all data, Regular users see only their data
             if self.user_role == 'admin':
                 export_data = self.attendance_data
             else:
-                export_data = [record for record in self.attendance_data if record['user_id'] == self.current_user_id]
+                # For roles users, they can see all data but only export their own
+                export_data = [record for record in self.attendance_data]
             
             if not export_data:
                 messagebox.showwarning("Warning", "No attendance data to export")
@@ -1304,23 +1305,32 @@ class WFHAttendanceApp:
             
             self.save_export_history(filepath, len(export_data))
             
+            # CONDITION 4: For roles users - don't auto time in, just create new session and clear records
             if self.user_role == 'roles':
-                user_export_data = [record for record in self.attendance_data if record['user_id'] == self.current_user_id]
-                
                 messagebox.showinfo(
                     "Success", 
                     f"Data exported successfully!\n\n"
-                    f"Exported {len(user_export_data)} records to:\n{filepath}\n\n"
-                    f"Your data has been exported. The main attendance records remain unchanged."
+                    f"Exported {len(export_data)} records to:\n{filepath}\n\n"
+                    f"Your data has been exported. Starting new session for the day."
                 )
                 
+                # Create new session for roles user after export
                 if self.current_user_id and not self.current_session_id:
                     self.create_new_session()
+                
+                # Clear the attendance records for the day (only for roles user's own data)
+                today = datetime.now().strftime("%Y-%m-%d")
+                self.attendance_data = [record for record in self.attendance_data 
+                                      if not (record['user_id'] == self.current_user_id and record['date'] == today)]
+                self.save_data()
+                
             else:
+                # CONDITION 2: Admin export doesn't affect attendance records
                 messagebox.showinfo(
                     "Success", 
                     f"Data exported successfully!\n\n"
-                    f"Exported {len(export_data)} records to:\n{filepath}"
+                    f"Exported {len(export_data)} records to:\n{filepath}\n\n"
+                    f"Attendance records remain unchanged for admin export."
                 )
             
             self.update_records_display()
@@ -1448,7 +1458,8 @@ class WFHAttendanceApp:
         for item in self.records_tree.get_children():
             self.records_tree.delete(item)
         
-        if self.user_role == 'admin':
+        # CONDITION 3: Admin and Roles users see all data, Regular users see only their data
+        if self.user_role in ['admin', 'roles']:
             display_data = self.attendance_data
         else:
             display_data = [record for record in self.attendance_data if record['user_id'] == self.current_user_id]
