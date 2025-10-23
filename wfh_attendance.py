@@ -605,14 +605,35 @@ class WFHAttendanceApp:
                 messagebox.showerror("Duplicate User", error_message)
                 return
             
+            # FIXED CONDITION 1: Show confirmation modal when registering admin
+            if role == 'admin':
+                confirm = messagebox.askyesno(
+                    "Register Admin User",
+                    f"Are you sure you want to register '{user_name}' ({user_id}) as an Administrator?\n\n"
+                    f"Admin users have full system access including:\n"
+                    f"• User management\n"
+                    f"• Data export\n"
+                    f"• Force session management\n\n"
+                    f"This action cannot be undone."
+                )
+                if not confirm:
+                    # Reset to regular user if not confirmed
+                    role_var.set("regular")
+                    return
+            
             # Register new user
             self.register_new_user(user_id, user_name, role)
-            messagebox.showinfo("Success", f"User '{user_name}' ({user_id}) registered as {role} successfully!")
             
-            # Clear fields
+            # Show appropriate success message
+            if role == 'admin':
+                messagebox.showinfo("Success", f"Administrator '{user_name}' ({user_id}) registered successfully!")
+            else:
+                messagebox.showinfo("Success", f"User '{user_name}' ({user_id}) registered as {role} successfully!")
+            
+            # Clear fields but keep the selected role
             new_user_id_var.set("")
             new_user_name_var.set("")
-            role_var.set("regular")
+            # Don't reset the role selection
             
             # Refresh user list
             refresh_user_list()
@@ -677,14 +698,28 @@ class WFHAttendanceApp:
             item = selected[0]
             user_id = users_tree.item(item, 'values')[0]
             user_name = users_tree.item(item, 'values')[1]
+            user_role = users_tree.item(item, 'values')[2]
             
             # Prevent self-deletion
             if user_id == self.current_user_id:
                 messagebox.showerror("Error", "You cannot delete your own account")
                 return
             
-            # Confirm deletion
-            confirm = messagebox.askyesno("Confirm Deletion", f"Are you sure you want to delete user '{user_name}' ({user_id})?")
+            # Extra confirmation for deleting admin users
+            if user_role == 'admin':
+                confirm = messagebox.askyesno(
+                    "Confirm Admin Deletion",
+                    f"WARNING: You are about to delete an Administrator account!\n\n"
+                    f"User: '{user_name}' ({user_id})\n\n"
+                    f"This action will remove all admin privileges from this user.\n"
+                    f"Are you absolutely sure you want to proceed?"
+                )
+            else:
+                confirm = messagebox.askyesno(
+                    "Confirm Deletion", 
+                    f"Are you sure you want to delete user '{user_name}' ({user_id})?"
+                )
+                
             if confirm:
                 # Remove from registered users
                 self.registered_users = [u for u in self.registered_users if u['user_id'] != user_id]
@@ -1038,21 +1073,20 @@ class WFHAttendanceApp:
             # Save export history
             self.save_export_history(filepath, len(export_data))
             
-            # For Roles Users only: Clear their own records after export and start new session
+            # FIXED CONDITION 2: For Roles Users only - create a COPY for export, don't modify main data
             if self.user_role == 'roles':
-                # Clear only the Roles User's records
-                self.attendance_data = [record for record in self.attendance_data if record['user_id'] != self.current_user_id]
-                self.save_data()
+                # Create a temporary copy of the user's data for display purposes only
+                user_export_data = [record for record in self.attendance_data if record['user_id'] == self.current_user_id]
                 
                 # Show success message with record count
                 messagebox.showinfo(
                     "Success", 
                     f"Data exported successfully!\n\n"
-                    f"Exported {len(export_data)} records to:\n{filepath}\n\n"
-                    f"Your attendance records have been cleared and new session started."
+                    f"Exported {len(user_export_data)} records to:\n{filepath}\n\n"
+                    f"Your data has been exported. The main attendance records remain unchanged."
                 )
                 
-                # Automatically create new session for Roles User
+                # Automatically create new session for Roles User without clearing data
                 if self.current_user_id and not self.current_session_id:
                     self.create_new_session()
             else:
