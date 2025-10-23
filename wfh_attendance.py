@@ -1311,18 +1311,26 @@ class WFHAttendanceApp:
                     "Success", 
                     f"Data exported successfully!\n\n"
                     f"Exported {len(export_data)} records to:\n{filepath}\n\n"
-                    f"Your data has been exported. Starting new session for the day."
+                    f"Starting new session for the day. Today's attendance records have been cleared."
                 )
                 
-                # Create new session for roles user after export
+                # Create new session for roles user after export (NO AUTO TIME IN)
                 if self.current_user_id and not self.current_session_id:
                     self.create_new_session()
                 
-                # Clear the attendance records for the day (only for roles user's own data)
+                # Clear ALL attendance records for the current day for ALL users
                 today = datetime.now().strftime("%Y-%m-%d")
-                self.attendance_data = [record for record in self.attendance_data 
-                                      if not (record['user_id'] == self.current_user_id and record['date'] == today)]
+                records_before_clear = len(self.attendance_data)
+                self.attendance_data = [record for record in self.attendance_data if record['date'] != today]
+                records_after_clear = len(self.attendance_data)
+                records_cleared = records_before_clear - records_after_clear
+                
                 self.save_data()
+                
+                # Update display to show cleared records
+                self.update_records_display()
+                
+                print(f"Cleared {records_cleared} attendance records for today ({today})")
                 
             else:
                 # CONDITION 2: Admin export doesn't affect attendance records
@@ -1332,8 +1340,6 @@ class WFHAttendanceApp:
                     f"Exported {len(export_data)} records to:\n{filepath}\n\n"
                     f"Attendance records remain unchanged for admin export."
                 )
-            
-            self.update_records_display()
             
             if messagebox.askyesno("Open File", "Do you want to open the Excel file?"):
                 self.open_file(filepath)
