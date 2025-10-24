@@ -1322,12 +1322,12 @@ class WFHAttendanceApp:
                     "Success", 
                     f"Data exported successfully!\n\n"
                     f"Exported {len(export_data)} records to:\n{filepath}\n\n"
-                    f"Starting new session for the day. All attendance records have been cleared."
+                    f"All attendance records have been cleared. Ready for new records."
                 )
                 
-                # Create new session for roles user after export (NO AUTO TIME IN)
-                if self.current_user_id and not self.current_session_id:
-                    self.create_new_session()
+                # REMOVED: No automatic new session creation for Roles User after export
+                # if self.current_user_id and not self.current_session_id:
+                #     self.create_new_session()
                 
             else:  # Admin user
                 messagebox.showinfo(
