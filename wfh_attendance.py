@@ -524,19 +524,19 @@ class WFHAttendanceApp:
         content_frame = ttk.Frame(self.export_card, style='Card.TFrame')
         content_frame.pack(fill=tk.X, padx=20, pady=15)
         
-        # Export Button (Admin and Roles only)
+        # Export Button (Roles only) - UPDATED: Admin users won't see this button
         self.export_btn = ttk.Button(
             content_frame,
             text="💾 Export to Excel",
             command=self.export_to_excel,
             style='Info.TButton'
         )
-        self.export_btn.pack(fill=tk.X)
+        # Button will be shown/hidden based on role in toggle_features_based_on_role method
         
-        # Roles Downloads Section (Admin only) - UPDATED: Now shows roles user exports
+        # Roles Downloads Section (Admin only)
         self.roles_downloads_frame = ttk.Frame(content_frame, style='Card.TFrame')
         
-        # Roles Downloads Label - UPDATED: Changed text
+        # Roles Downloads Label
         roles_downloads_label = ttk.Label(
             self.roles_downloads_frame,
             text="📥 Roles User Exports:",
@@ -552,7 +552,7 @@ class WFHAttendanceApp:
         scrollbar = ttk.Scrollbar(listbox_frame)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        # Listbox for roles downloads - UPDATED: Changed variable name
+        # Listbox for roles downloads
         self.roles_downloads_listbox = tk.Listbox(
             listbox_frame,
             yscrollcommand=scrollbar.set,
@@ -565,7 +565,7 @@ class WFHAttendanceApp:
         self.roles_downloads_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.config(command=self.roles_downloads_listbox.yview)
         
-        # Download button for admin - UPDATED: Changed variable name and command
+        # Download button for admin
         self.roles_download_btn = ttk.Button(
             self.roles_downloads_frame,
             text="📥 Download Selected",
@@ -574,7 +574,7 @@ class WFHAttendanceApp:
         )
         self.roles_download_btn.pack(fill=tk.X, pady=(5, 0))
         
-        # Refresh button for roles downloads - UPDATED: Changed variable name and command
+        # Refresh button for roles downloads
         self.roles_refresh_btn = ttk.Button(
             self.roles_downloads_frame,
             text="🔄 Refresh List",
@@ -733,26 +733,30 @@ class WFHAttendanceApp:
             self.manage_users_btn.config(state=tk.NORMAL)
             self.force_out_btn.pack(pady=(12, 0))
             self.auto_time_in_btn.pack_forget()
-            self.roles_downloads_frame.pack(fill=tk.X, pady=(15, 0))  # UPDATED: Changed variable name
-            self.refresh_roles_downloads()  # UPDATED: Changed method call
+            self.roles_downloads_frame.pack(fill=tk.X, pady=(15, 0))
+            self.export_btn.pack_forget()  # UPDATED: Hide export button for admin
+            self.refresh_roles_downloads()
         elif self.user_role == 'roles':
             self.export_card.pack(fill=tk.X, pady=(0, 10))
             self.manage_users_btn.config(state=tk.DISABLED)
             self.force_out_btn.pack_forget()
             self.auto_time_in_btn.pack(side=tk.LEFT, padx=(8, 0))
-            self.roles_downloads_frame.pack_forget()  # UPDATED: Changed variable name
+            self.roles_downloads_frame.pack_forget()
+            self.export_btn.pack(fill=tk.X)  # UPDATED: Show export button for roles users
         elif self.user_role == 'regular':
             self.export_card.pack_forget()
             self.manage_users_btn.config(state=tk.DISABLED)
             self.force_out_btn.pack_forget()
             self.auto_time_in_btn.pack_forget()
-            self.roles_downloads_frame.pack_forget()  # UPDATED: Changed variable name
+            self.roles_downloads_frame.pack_forget()
+            self.export_btn.pack_forget()
         else:
             self.export_card.pack_forget()
             self.manage_users_btn.config(state=tk.DISABLED)
             self.force_out_btn.pack_forget()
             self.auto_time_in_btn.pack_forget()
-            self.roles_downloads_frame.pack_forget()  # UPDATED: Changed variable name
+            self.roles_downloads_frame.pack_forget()
+            self.export_btn.pack_forget()
 
     def refresh_roles_downloads(self):
         """Refresh the list of available roles user exports for admin download"""
@@ -1068,7 +1072,7 @@ class WFHAttendanceApp:
             tree_frame,
             columns=columns,
             show='headings',
-            style='Modern.Treeview',
+            style='Modern.TTreeview',
             yscrollcommand=scrollbar.set,
             height=8
         )
@@ -1408,9 +1412,9 @@ class WFHAttendanceApp:
         return f"{int(hours):02d}:{int(minutes):02d}"
 
     def export_to_excel(self):
-        """Export attendance data to Excel (Admin and Roles only)"""
-        if self.user_role not in ['admin', 'roles']:
-            messagebox.showerror("Access Denied", "Only Admin and Roles Users can export data to Excel.")
+        """Export attendance data to Excel (Roles only) - UPDATED: Admin users can no longer export"""
+        if self.user_role != 'roles':  # UPDATED: Only roles users can export
+            messagebox.showerror("Access Denied", "Only Roles Users can export data to Excel.")
             return
             
         if not self.attendance_data:
@@ -1418,12 +1422,8 @@ class WFHAttendanceApp:
             return
         
         try:
-            # CONDITION 3: Admin and Roles users see all data, Regular users see only their data
-            if self.user_role == 'admin':
-                export_data = self.attendance_data
-            else:
-                # For roles users, they can see all data but only export their own
-                export_data = [record for record in self.attendance_data]
+            # Roles users can see all data for export
+            export_data = [record for record in self.attendance_data]
             
             if not export_data:
                 messagebox.showwarning("Warning", "No attendance data to export")
@@ -1449,34 +1449,24 @@ class WFHAttendanceApp:
             
             self.save_export_history(filepath, len(export_data))
             
-            # Clear ALL attendance records for BOTH Admin and Roles users after export
+            # Clear ALL attendance records for Roles users after export
             records_before_clear = len(self.attendance_data)
             self.attendance_data = []  # Clear all attendance records
             self.save_data()
             records_cleared = records_before_clear
             
-            # Different behavior for Roles User vs Admin User
-            if self.user_role == 'roles':
-                # Save a copy to roles_exports directory for admin access
-                roles_copy_path = self.save_roles_export_copy(filepath, self.current_user_id)
-                
-                messagebox.showinfo(
-                    "Success", 
-                    f"Data exported successfully!\n\n"
-                    f"Exported {len(export_data)} records to:\n{filepath}\n\n"
-                    f"All attendance records have been cleared. Ready for new records.\n\n"
-                    f"📤 A copy has been saved for Admin access."
-                )
-                
-            else:  # Admin user
-                messagebox.showinfo(
-                    "Success", 
-                    f"Data exported successfully!\n\n"
-                    f"Exported {len(export_data)} records to:\n{filepath}\n\n"
-                    f"All attendance records have been cleared. System ready for new records."
-                )
+            # Save a copy to roles_exports directory for admin access
+            roles_copy_path = self.save_roles_export_copy(filepath, self.current_user_id)
             
-            # Update display to show cleared records for both user types
+            messagebox.showinfo(
+                "Success", 
+                f"Data exported successfully!\n\n"
+                f"Exported {len(export_data)} records to:\n{filepath}\n\n"
+                f"All attendance records have been cleared. Ready for new records.\n\n"
+                f"📤 A copy has been saved for Admin access."
+            )
+            
+            # Update display to show cleared records
             self.update_records_display()
             
             print(f"Cleared {records_cleared} attendance records after export")
