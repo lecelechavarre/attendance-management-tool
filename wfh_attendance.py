@@ -7,6 +7,8 @@ import pandas as pd
 from typing import Dict, List, Optional
 import subprocess
 import sys
+import zipfile
+import shutil
 
 class WFHAttendanceApp:
     def __init__(self, root):
@@ -32,6 +34,7 @@ class WFHAttendanceApp:
         self.archive_file = "deleted_users_archive.json"
         self.admin_file = "admin_users.json"
         self.roles_file = "roles_users.json"
+        self.roles_exports_dir = "roles_exports"  # Changed from admin_exports to roles_exports
         self.attendance_data = self.load_data()
         self.active_sessions = self.load_sessions()
         self.export_history = self.load_export_history()
@@ -39,6 +42,9 @@ class WFHAttendanceApp:
         self.deleted_users_archive = self.load_archive()
         self.admin_users = self.load_admin_users()
         self.roles_users = self.load_roles_users()
+        
+        # Create roles exports directory if it doesn't exist
+        self.create_roles_exports_dir()
         
         # Current user session
         self.current_user_id = None
@@ -57,6 +63,11 @@ class WFHAttendanceApp:
         
         # Initially hide features based on role
         self.toggle_features_based_on_role()
+
+    def create_roles_exports_dir(self):
+        """Create directory for roles user export files"""
+        if not os.path.exists(self.roles_exports_dir):
+            os.makedirs(self.roles_exports_dir)
 
     def center_window(self):
         """Center the window on the screen"""
@@ -522,6 +533,56 @@ class WFHAttendanceApp:
         )
         self.export_btn.pack(fill=tk.X)
         
+        # Roles Downloads Section (Admin only) - UPDATED: Now shows roles user exports
+        self.roles_downloads_frame = ttk.Frame(content_frame, style='Card.TFrame')
+        
+        # Roles Downloads Label - UPDATED: Changed text
+        roles_downloads_label = ttk.Label(
+            self.roles_downloads_frame,
+            text="📥 Roles User Exports:",
+            style='Section.TLabel'
+        )
+        roles_downloads_label.pack(anchor=tk.W, pady=(10, 5))
+        
+        # Roles downloads listbox with scrollbar
+        listbox_frame = ttk.Frame(self.roles_downloads_frame, style='Card.TFrame')
+        listbox_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        # Scrollbar for listbox
+        scrollbar = ttk.Scrollbar(listbox_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Listbox for roles downloads - UPDATED: Changed variable name
+        self.roles_downloads_listbox = tk.Listbox(
+            listbox_frame,
+            yscrollcommand=scrollbar.set,
+            height=4,
+            font=('Segoe UI', 9),
+            bg='white',
+            relief='solid',
+            borderwidth=1
+        )
+        self.roles_downloads_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.config(command=self.roles_downloads_listbox.yview)
+        
+        # Download button for admin - UPDATED: Changed variable name and command
+        self.roles_download_btn = ttk.Button(
+            self.roles_downloads_frame,
+            text="📥 Download Selected",
+            command=self.download_roles_export,
+            style='Success.TButton'
+        )
+        self.roles_download_btn.pack(fill=tk.X, pady=(5, 0))
+        
+        # Refresh button for roles downloads - UPDATED: Changed variable name and command
+        self.roles_refresh_btn = ttk.Button(
+            self.roles_downloads_frame,
+            text="🔄 Refresh List",
+            command=self.refresh_roles_downloads,
+            style='Secondary.TButton'
+        )
+        self.roles_refresh_btn.pack(fill=tk.X, pady=(5, 0))
+        
         # Export Path Label
         path_frame = ttk.Frame(content_frame, style='Card.TFrame')
         path_frame.pack(fill=tk.X, pady=(8, 0))
@@ -672,21 +733,99 @@ class WFHAttendanceApp:
             self.manage_users_btn.config(state=tk.NORMAL)
             self.force_out_btn.pack(pady=(12, 0))
             self.auto_time_in_btn.pack_forget()
+            self.roles_downloads_frame.pack(fill=tk.X, pady=(15, 0))  # UPDATED: Changed variable name
+            self.refresh_roles_downloads()  # UPDATED: Changed method call
         elif self.user_role == 'roles':
             self.export_card.pack(fill=tk.X, pady=(0, 10))
             self.manage_users_btn.config(state=tk.DISABLED)
             self.force_out_btn.pack_forget()
             self.auto_time_in_btn.pack(side=tk.LEFT, padx=(8, 0))
+            self.roles_downloads_frame.pack_forget()  # UPDATED: Changed variable name
         elif self.user_role == 'regular':
             self.export_card.pack_forget()
             self.manage_users_btn.config(state=tk.DISABLED)
             self.force_out_btn.pack_forget()
             self.auto_time_in_btn.pack_forget()
+            self.roles_downloads_frame.pack_forget()  # UPDATED: Changed variable name
         else:
             self.export_card.pack_forget()
             self.manage_users_btn.config(state=tk.DISABLED)
             self.force_out_btn.pack_forget()
             self.auto_time_in_btn.pack_forget()
+            self.roles_downloads_frame.pack_forget()  # UPDATED: Changed variable name
+
+    def refresh_roles_downloads(self):
+        """Refresh the list of available roles user exports for admin download"""
+        if self.user_role != 'admin':
+            return
+            
+        self.roles_downloads_listbox.delete(0, tk.END)
+        
+        try:
+            if os.path.exists(self.roles_exports_dir):
+                files = os.listdir(self.roles_exports_dir)
+                excel_files = [f for f in files if f.endswith('.xlsx')]
+                
+                for excel_file in sorted(excel_files, reverse=True):  # Show newest first
+                    self.roles_downloads_listbox.insert(tk.END, excel_file)
+                    
+            if self.roles_downloads_listbox.size() == 0:
+                self.roles_downloads_listbox.insert(tk.END, "No roles user exports available")
+                self.roles_download_btn.config(state=tk.DISABLED)
+            else:
+                self.roles_download_btn.config(state=tk.NORMAL)
+                
+        except Exception as e:
+            print(f"Error refreshing roles downloads: {e}")
+
+    def download_roles_export(self):
+        """Download selected roles user export file (for admin users)"""
+        if self.user_role != 'admin':
+            return
+            
+        selected = self.roles_downloads_listbox.curselection()
+        if not selected:
+            messagebox.showwarning("Warning", "Please select a file to download")
+            return
+            
+        excel_filename = self.roles_downloads_listbox.get(selected[0])
+        excel_filepath = os.path.join(self.roles_exports_dir, excel_filename)
+        
+        try:
+            if sys.platform == "win32":
+                downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
+            elif sys.platform == "darwin":
+                downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
+            else:
+                downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
+            
+            destination = os.path.join(downloads_path, excel_filename)
+            shutil.copy2(excel_filepath, destination)
+            
+            messagebox.showinfo("Success", f"Roles user export downloaded to:\n{destination}")
+            
+            if messagebox.askyesno("Open File", "Do you want to open the downloaded Excel file?"):
+                self.open_file(destination)
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to download file: {str(e)}")
+
+    def save_roles_export_copy(self, original_excel_path, roles_user_id):
+        """Save a copy of the Excel file to roles_exports directory for admin access"""
+        try:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            excel_filename = f"roles_export_{roles_user_id}_{timestamp}.xlsx"
+            excel_filepath = os.path.join(self.roles_exports_dir, excel_filename)
+            
+            # Copy the Excel file directly to roles_exports directory
+            shutil.copy2(original_excel_path, excel_filepath)
+            
+            print(f"Roles export copy saved: {excel_filepath}")
+            return excel_filepath
+            
+        except Exception as e:
+            print(f"Error saving roles export copy: {e}")
+            return None
 
     def get_user_role(self, user_id: str) -> str:
         """Get user role: admin, roles, or regular"""
@@ -1318,16 +1457,16 @@ class WFHAttendanceApp:
             
             # Different behavior for Roles User vs Admin User
             if self.user_role == 'roles':
+                # Save a copy to roles_exports directory for admin access
+                roles_copy_path = self.save_roles_export_copy(filepath, self.current_user_id)
+                
                 messagebox.showinfo(
                     "Success", 
                     f"Data exported successfully!\n\n"
                     f"Exported {len(export_data)} records to:\n{filepath}\n\n"
-                    f"All attendance records have been cleared. Ready for new records."
+                    f"All attendance records have been cleared. Ready for new records.\n\n"
+                    f"📤 A copy has been saved for Admin access."
                 )
-                
-                # REMOVED: No automatic new session creation for Roles User after export
-                # if self.current_user_id and not self.current_session_id:
-                #     self.create_new_session()
                 
             else:  # Admin user
                 messagebox.showinfo(
