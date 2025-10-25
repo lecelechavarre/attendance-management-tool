@@ -9,6 +9,7 @@ import subprocess
 import sys
 import zipfile
 import shutil
+import stat
 
 class WFHAttendanceApp:
     def __init__(self, root):
@@ -831,6 +832,32 @@ class WFHAttendanceApp:
             print(f"Error saving roles export copy: {e}")
             return None
 
+    def make_file_read_only(self, filepath):
+        """Make file read-only for non-admin users"""
+        try:
+            if sys.platform == "win32":
+                # On Windows, set file attributes to read-only
+                os.chmod(filepath, stat.S_IREAD)
+            else:
+                # On Unix/Linux/Mac, remove write permissions for all users
+                os.chmod(filepath, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+            print(f"File made read-only: {filepath}")
+        except Exception as e:
+            print(f"Error making file read-only: {e}")
+
+    def make_file_writable(self, filepath):
+        """Make file writable (for admin users)"""
+        try:
+            if sys.platform == "win32":
+                # On Windows, remove read-only attribute
+                os.chmod(filepath, stat.S_IWRITE)
+            else:
+                # On Unix/Linux/Mac, add write permissions for owner
+                os.chmod(filepath, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+            print(f"File made writable: {filepath}")
+        except Exception as e:
+            print(f"Error making file writable: {e}")
+
     def get_user_role(self, user_id: str) -> str:
         """Get user role: admin, roles, or regular"""
         for admin in self.admin_users:
@@ -1014,7 +1041,7 @@ class WFHAttendanceApp:
                 messagebox.showerror("Duplicate User", error_message)
                 return
             
-            # CONDITION 1: Fix for admin role selection - show modal but keep dropdown as "regular"
+            # Fix for admin role selection - show modal but keep dropdown as "regular"
             if role == 'admin':
                 confirm = messagebox.askyesno(
                     "Register Admin User",
@@ -1422,8 +1449,8 @@ class WFHAttendanceApp:
             return
         
         try:
-            # Roles users can see all data for export
-            export_data = [record for record in self.attendance_data]
+            # FIXED: Roles users should export ALL attendance data, not just filtered data
+            export_data = self.attendance_data  # Use all data directly
             
             if not export_data:
                 messagebox.showwarning("Warning", "No attendance data to export")
@@ -1445,7 +1472,10 @@ class WFHAttendanceApp:
             
             df.to_excel(filepath, index=False, engine='openpyxl')
             
-            self.export_path_var.set(f"📁 Exported to: {filepath}")
+            # NEW: Make the exported file read-only for roles users
+            self.make_file_read_only(filepath)
+            
+            self.export_path_var.set(f"📁 Exported to: {filepath} (Read-only)")
             
             self.save_export_history(filepath, len(export_data))
             
@@ -1458,12 +1488,17 @@ class WFHAttendanceApp:
             # Save a copy to roles_exports directory for admin access
             roles_copy_path = self.save_roles_export_copy(filepath, self.current_user_id)
             
+            # NEW: Make the admin copy writable for admin users
+            if roles_copy_path:
+                self.make_file_writable(roles_copy_path)
+            
             messagebox.showinfo(
                 "Success", 
                 f"Data exported successfully!\n\n"
                 f"Exported {len(export_data)} records to:\n{filepath}\n\n"
+                f"📝 File is READ-ONLY to maintain data integrity.\n"
                 f"All attendance records have been cleared. Ready for new records.\n\n"
-                f"📤 A copy has been saved for Admin access."
+                f"📤 A writable copy has been saved for Admin access."
             )
             
             # Update display to show cleared records
@@ -1626,7 +1661,7 @@ class WFHAttendanceApp:
         for item in self.records_tree.get_children():
             self.records_tree.delete(item)
         
-        # CONDITION 3: Admin and Roles users see all data, Regular users see only their data
+        # Admin and Roles users see all data, Regular users see only their data
         if self.user_role in ['admin', 'roles']:
             display_data = self.attendance_data
         else:
