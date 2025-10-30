@@ -1,4 +1,5 @@
 WFH Attendance System
+
 A desktop application for tracking Work From Home attendance with secure role-based access control and automated data export features.
 
 Features
