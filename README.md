@@ -27,15 +27,17 @@ Features
 - Read-only Protection: Exported files are read-only for roles users but editable for admin
 
 **Prerequisites**
+```
 Python 3.7 or higher
 Required Python packages (install via pip):
-
-bash
+```
+```bash
 pip install tkinter pandas openpyxl
-
+```
 
 🛠️ Technical Details
 File Structure
+```
 wfh_attendance_system/
 ├── wfh_attendance_system.py  # Main application
 ├── attendance_data.json      # Attendance records
@@ -46,7 +48,7 @@ wfh_attendance_system/
 ├── export_history.json       # Export log
 ├── deleted_users_archive.json # User archive
 └── roles_exports/            # Admin-accessible exports
-
+```
 **Dependencies**
 - tkinter: GUI framework
 - pandas: Data manipulation and Excel export
